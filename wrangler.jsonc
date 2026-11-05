@@ -1,0 +1,16 @@
+// Cloudflare Workers deploy for a fully static Astro build.
+// With this file present, `wrangler deploy` uploads dist/ as static assets
+// and does not try to install the @astrojs/cloudflare adapter (not needed:
+// there is no server-side rendering).
+//
+// Build command:  npm run build
+// Deploy command: npx wrangler deploy
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Must match the Worker's name in the Cloudflare dashboard.
+  "name": "phitopolis-astro",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
