@@ -20,6 +20,20 @@ import { prefersReducedMotion } from "../../runtime/media";
 import { createNavAutohide } from "./useNavAutohide";
 import { megaNav } from "./TopNavMegaDrawer";
 
+/** Layout box of `el` relative to `container` (offset-based, so in-flight
+ *  entrance transforms don't skew it — motion's layout projection measures the same way). */
+function layoutBox(el: HTMLElement, container: HTMLElement) {
+  let x = 0;
+  let y = 0;
+  let node: HTMLElement | null = el;
+  while (node && node !== container) {
+    x += node.offsetLeft;
+    y += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return { x, y, width: el.offsetWidth, height: el.offsetHeight };
+}
+
 /** Scroll offset at which non-home routes leave the transparent top state. */
 const NAV_SOLID_AFTER_PX = 50;
 
@@ -100,11 +114,7 @@ export function initSiteNavbar(): void {
   const pill = header.querySelector<HTMLElement>("[data-nav-pill]");
   if (list && pill) {
     let current: HTMLElement | null = null;
-    const geometry = (link: HTMLElement) => {
-      const a = link.getBoundingClientRect();
-      const b = list.getBoundingClientRect();
-      return { x: a.left - b.left, y: a.top - b.top, width: a.width, height: a.height };
-    };
+    const geometry = (link: HTMLElement) => layoutBox(link, list);
     const show = (link: HTMLElement) => {
       const g = geometry(link);
       if (current === null || reduced) {

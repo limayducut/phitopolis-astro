@@ -42,7 +42,7 @@ const arrow = "m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z";
 
         <div class="site-footer__cell site-footer__cell--paths">
           <div class="site-footer__stagger" data-stagger-item>
-            <div class="site-footer__stack" style="--gap: 16px">
+            <div class="site-footer__stack site-footer__stack--16">
               <p class="site-footer__label">PATHWAYS</p>
               <nav class="site-footer__nav" aria-label="Footer navigation">
                 {
@@ -63,9 +63,9 @@ const arrow = "m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z";
 
         <div class="site-footer__cell site-footer__cell--contact site-footer__phone-hidden">
           <div class="site-footer__stagger" data-stagger-item>
-            <div class="site-footer__stack" style="--gap: 18px">
+            <div class="site-footer__stack site-footer__stack--18">
               <p class="site-footer__label">CONTACT</p>
-              <div class="site-footer__stack" style="--gap: 13.2px">
+              <div class="site-footer__stack site-footer__stack--13">
                 <div>
                   <p class="site-footer__label site-footer__sublabel">INQUIRIES</p>
                   <a class="site-footer__mail" href="mailto:info@phitopolis.com">
@@ -232,12 +232,24 @@ const arrow = "m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z";
     flex-direction: column;
   }
 
-  .site-footer__stack > :not(style) ~ :not(style) {
-    margin-top: var(--gap, 20px);
+  /* MUI Stack spacing (margin on following siblings): 2.5 / 2 / 2.25 / 1.65 */
+  .site-footer__intro > :not(style) ~ :not(style) {
+    margin-top: 20px;
+  }
+
+  .site-footer__stack--16 > :not(style) ~ :not(style) {
+    margin-top: 16px;
+  }
+
+  .site-footer__stack--18 > :not(style) ~ :not(style) {
+    margin-top: 18px;
+  }
+
+  .site-footer__stack--13 > :not(style) ~ :not(style) {
+    margin-top: 13.2px;
   }
 
   .site-footer__intro {
-    --gap: 20px;
     max-width: 410px;
   }
 
@@ -255,7 +267,6 @@ const arrow = "m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z";
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.65;
-    letter-spacing: 0.00938em;
   }
 
   .site-footer__eyebrow {
@@ -317,7 +328,6 @@ const arrow = "m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z";
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.65;
-    letter-spacing: 0.00938em;
     text-decoration: none !important;
   }
 

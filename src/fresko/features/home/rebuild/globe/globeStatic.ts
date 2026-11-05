@@ -229,6 +229,8 @@ export function createGlobeStatic({
           for (const [k, v] of Object.entries(arc.fade)) nodes.gradient.setAttribute(k, String(v));
         }
       } else if (nodes.defs) {
+        // The cursor may sit on this very <defs>: step past it before it leaves the DOM.
+        if (cursor === nodes.defs) cursor = cursor.nextSibling;
         nodes.defs.remove();
         nodes.defs = null;
         nodes.gradient = null;

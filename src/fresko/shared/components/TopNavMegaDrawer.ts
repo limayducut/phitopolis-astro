@@ -21,6 +21,20 @@ const HOVER_CLICK_GRACE_MS = 700;
 const EXIT_MS = 420;
 const EXIT_REDUCED_MS = 160;
 
+/** Layout box of `el` relative to `container` (offset-based, so in-flight
+ *  entrance transforms don't skew it — motion's layout projection measures the same way). */
+function layoutBox(el: HTMLElement, container: HTMLElement) {
+  let x = 0;
+  let y = 0;
+  let node: HTMLElement | null = el;
+  while (node && node !== container) {
+    x += node.offsetLeft;
+    y += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return { x, y, width: el.offsetWidth, height: el.offsetHeight };
+}
+
 let hoverTimer: number | null = null;
 let hoverOpenedAt = 0;
 
@@ -95,12 +109,11 @@ export function initTopNavMegaDrawer(): void {
       pillAt = null;
       return;
     }
-    const a = row.getBoundingClientRect();
-    const b = rowsBox.getBoundingClientRect();
+    const g = layoutBox(row, rowsBox);
     const target = {
-      transform: `translate(${a.left - b.left}px, ${a.top - b.top}px)`,
-      width: `${a.width}px`,
-      height: `${a.height}px`,
+      transform: `translate(${g.x}px, ${g.y}px)`,
+      width: `${g.width}px`,
+      height: `${g.height}px`,
     };
     if (instant || reduced || pillAt === null) Object.assign(pill.style, target);
     else if (pillAt !== row) animate(pill, target, { type: "spring", stiffness: 420, damping: 36 });

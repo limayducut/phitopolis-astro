@@ -66,5 +66,5 @@ export function deviceTier(): DeviceTier {
 
 export const isLowPowerDevice = (): boolean => deviceTier() === "low";
 
-/** Fine pointer (usePointerFine). */
-export const pointerFine = () => media("(hover: hover) and (pointer: fine)");
+/** Fine pointer (usePointerFine.ts POINTER_FINE). */
+export const pointerFine = () => media("(pointer: fine)");

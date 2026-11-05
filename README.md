@@ -9,8 +9,18 @@ pinned chapters with live diagrams, the gold handoff point, mega menu, cookie
 notice and the rest — with no React or MUI: Astro renders the markup, and plain
 TypeScript drives it with GSAP, Lenis, Motion and ogl at fresko's exact versions.
 
-> **Status:** port in progress. Done: the intro (preloader).
-> In progress: home sections, chapter diagrams + handoff, site chrome.
+> **Status:** complete. Checked side by side against UAT at 23 scroll
+> positions each at 1440×900 (motion on), 390×844 and with reduced motion,
+> plus the first-visit intro. Remaining differences are timing-only: ambient
+> loops (globe drift, pulses, hero film) depend on when the page loaded, and
+> the intro overlay shows from first paint instead of after a JS bundle mounts.
+>
+> Not ported, because there is nothing to navigate to on a home-only build:
+> the route transition curtain, route-chunk warming and the DEV-only ID overlay.
+> The cookie notice is ported but off, as in fresko (`ANALYTICS_PROVIDER_ENABLED = false`).
+
+Deploys to Cloudflare as static assets (`wrangler.jsonc` → `dist/`); the host
+must support HTTP range requests so the closing film can be scrubbed (Cloudflare does).
 
 ```sh
 npm install
