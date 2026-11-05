@@ -1,0 +1,164 @@
+---
+// CookieNotice.tsx: the GDPR consent gate for analytics. It shows only when
+// an analytics provider exists (consent.ts ANALYTICS_PROVIDER_ENABLED — false
+// in fresko, so UAT renders nothing) and the visitor has not chosen yet.
+// The markup ships inside a <template>; CookieNotice.ts mounts it when shown.
+import "./buttonBase.css";
+---
+<template data-cookie-notice-template>
+  <div class="cookie-notice" role="region" aria-label="Cookie consent" data-cookie-notice>
+    <div class="cookie-notice__card">
+      <div class="cookie-notice__row">
+        <svg class="cookie-notice__icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="10.5" cy="8.5" r="1.5"></circle><circle cx="8.5" cy="13.5" r="1.5"></circle><circle cx="15" cy="15" r="1"></circle>
+          <path d="M21.95 10.99c-1.79-.03-3.7-1.95-2.68-4.22-2.97 1-5.78-1.59-5.19-4.56C7.11.74 2 6.41 2 12c0 5.52 4.48 10 10 10 5.89 0 10.54-5.08 9.95-11.01M12 20c-4.41 0-8-3.59-8-8 0-3.31 2.73-8.18 8.08-8.02.42 2.54 2.44 4.56 4.99 4.94.07.36.52 2.55 2.92 3.63C19.7 16.86 16.06 20 12 20"></path>
+        </svg>
+        <div class="cookie-notice__body">
+          <p class="cookie-notice__text">
+            We use analytics cookies to understand how visitors use this site. Essential local
+            storage (interface preferences) is always on.{" "}
+            <a class="cookie-notice__link" href="#">Privacy Policy</a>
+          </p>
+          <div class="cookie-notice__actions">
+            <button class="cookie-notice__btn cookie-notice__btn--accept" type="button" aria-label="Accept analytics cookies" data-consent="granted">Accept</button>
+            <button class="cookie-notice__btn cookie-notice__btn--decline" type="button" aria-label="Decline analytics cookies" data-consent="denied">Decline</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style is:global>
+  .cookie-notice {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1400;
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px;
+    pointer-events: none;
+  }
+
+  .cookie-notice__card {
+    pointer-events: auto;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ffc72c55;
+    border-radius: var(--r-card);
+    background-color: #06183b;
+    color: #f4f7fc;
+    box-shadow: var(--glass-shadow-3);
+  }
+
+  @media (min-width: 900px) {
+    .cookie-notice__card {
+      max-width: 460px;
+      padding: 14px 20px;
+    }
+  }
+
+  .cookie-notice__row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .cookie-notice__row > * + * {
+    margin-left: 14px;
+  }
+
+  .cookie-notice__icon {
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+    margin-top: 2px;
+    font-size: 1.15rem;
+    fill: #ffc72c;
+  }
+
+  .cookie-notice__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .cookie-notice__body > * + * {
+    margin-top: 10px;
+  }
+
+  .cookie-notice__text {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-family: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .cookie-notice__link {
+    color: #f4f7fc;
+    text-underline-offset: 3px;
+  }
+
+  .cookie-notice__link:hover {
+    color: #ffc72c;
+  }
+
+  .cookie-notice__actions {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .cookie-notice__actions > * + * {
+    margin-left: 8px;
+  }
+
+  /* MUI Button size="small" + theme root (padding 12/24 wins over the size). */
+  .cookie-notice__btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    margin: 0;
+    padding: 12px 24px;
+    border-radius: var(--r-control);
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.75;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: var(--t-glass);
+  }
+
+  .cookie-notice__btn--accept {
+    border: 1px solid var(--accent-border);
+    background-color: #ffc72c;
+    color: #06183b;
+    font-weight: 700;
+  }
+
+  .cookie-notice__btn--accept:hover {
+    background-color: #ffc72c;
+    filter: brightness(1.08);
+  }
+
+  .cookie-notice__btn--decline {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: var(--glass-under);
+    background-image: linear-gradient(var(--glass-fill-1), var(--glass-fill-1));
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .cookie-notice__btn--decline:hover {
+    border-color: #ffc72c;
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ffc72c;
+  }
+</style>

@@ -1,0 +1,112 @@
+/* The chapter visuals' MUI `sx` styles, as CSS (GlobeStatic, SpinningGlobe, HandoffCarrier).
+   visuals.css (verbatim from fresko) carries the rest. */
+
+/* GlobeStatic: frost dots and rim on an opaque navy disc. */
+.globe-static {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  overflow: visible;
+}
+.globe-static .globe-disc,
+.globe-static .globe-night,
+.globe-static .globe-day {
+  stroke: #f4f7fc;
+}
+
+/* SpinningGlobe: drag to turn; arcs draw out from the hub one after another. */
+[data-spinning-globe] {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: pan-y;
+}
+[data-spinning-globe]:active {
+  cursor: grabbing;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-spinning-globe] .globe-arc {
+    animation: globe-arc-run 6s ease-in-out infinite;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='0'] {
+    animation-delay: 0s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='1'] {
+    animation-delay: 0.5s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='2'] {
+    animation-delay: 1s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='3'] {
+    animation-delay: 1.5s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='4'] {
+    animation-delay: 2s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='5'] {
+    animation-delay: 2.5s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='6'] {
+    animation-delay: 3s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='7'] {
+    animation-delay: 3.5s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='8'] {
+    animation-delay: 4s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='9'] {
+    animation-delay: 4.5s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='10'] {
+    animation-delay: 5s;
+  }
+  [data-spinning-globe] .globe-arc[data-arc='11'] {
+    animation-delay: 5.5s;
+  }
+}
+/* The handoff: until the carrier has landed on the hub the arcs are not drawn. */
+[data-arcs-held] [data-spinning-globe] .globe-arc {
+  animation: none;
+  stroke-dashoffset: 1;
+}
+[data-spinning-globe] .globe-arcs {
+  opacity: var(--pv-arcs-alpha, 1);
+}
+[data-spinning-globe] .globe-hq-pulse {
+  opacity: var(--pv-hq-pulse-alpha, 0);
+  transform: scale(var(--pv-hq-pulse-scale, 1));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes globe-arc-run {
+  0% {
+    stroke-dashoffset: 1;
+    stroke-opacity: 0.9;
+  }
+  45% {
+    stroke-dashoffset: 0;
+    stroke-opacity: 0.9;
+  }
+  80% {
+    stroke-dashoffset: 0;
+    stroke-opacity: 0.9;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    stroke-opacity: 0;
+  }
+}
+
+/* HandoffCarrier: over the chapters' stages, under the navbar (appBar 1100 - 1). */
+.pipeline-handoff-carrier {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1099;
+}

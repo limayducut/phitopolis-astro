@@ -1,0 +1,92 @@
+---
+// GoldThread.tsx: one segment of the gold gutter thread — a faint track, the
+// 2px drawn line (data-thread-draw) and, on desktop with motion, the tip
+// (data-thread-tip). HomeThreadRun draws and moves them.
+import {
+  GUTTER_LINE_X,
+  THREAD_LINE_PX,
+  THREAD_TIP_PX,
+  THREAD_TRACK_COLOR,
+} from "@/features/home/rebuild/homeLayout";
+import { NOIR } from "@/shared/theme/palette";
+
+interface Props {
+  prefix: string;
+  /** The first segment in a run: its tip is visible by default. */
+  lead?: boolean;
+  zIndex?: number;
+}
+const { prefix, lead = false, zIndex = 1 } = Astro.props;
+const vars = [
+  `--gt-x-xs: ${GUTTER_LINE_X.xs}px`,
+  `--gt-x-sm: ${GUTTER_LINE_X.sm}px`,
+  `--gt-x-md: ${GUTTER_LINE_X.md}px`,
+  `--gt-w: ${THREAD_LINE_PX}px`,
+  `--gt-tip: ${THREAD_TIP_PX}px`,
+  `--gt-track: ${THREAD_TRACK_COLOR}`,
+  `--gt-gold: ${NOIR.gold}`,
+  `z-index: ${zIndex}`,
+].join("; ");
+---
+<div class:list={[`${prefix}-thread`, "gold-thread"]} data-thread-segment="" aria-hidden="true" style={vars}>
+  <div class:list={[`${prefix}-gutter-track`, "gold-thread-track"]}></div>
+  <div class:list={[`${prefix}-gutter-line`, "gold-thread-line"]} data-thread-draw=""></div>
+  <!-- Rendered only on desktop with motion in fresko (`tip={desktop}`): hidden by CSS elsewhere. -->
+  <div class:list={[`${prefix}-gutter-tip`, "gold-thread-tip"]} data-thread-tip={lead ? "lead" : "follow"}></div>
+</div>
+
+<style is:global>
+  .gold-thread {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--gt-x-xs);
+    width: 0;
+    pointer-events: none;
+  }
+  @media (min-width: 600px) {
+    .gold-thread {
+      left: var(--gt-x-sm);
+    }
+  }
+  @media (min-width: 900px) {
+    .gold-thread {
+      left: var(--gt-x-md);
+    }
+  }
+  .gold-thread-track,
+  .gold-thread-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--gt-w);
+    margin-left: calc(var(--gt-w) / -2);
+  }
+  .gold-thread-track {
+    background-color: var(--gt-track);
+  }
+  .gold-thread-line {
+    background-color: var(--gt-gold);
+    transform-origin: 50% 0;
+  }
+  /* THREAD_TIP_SX */
+  .gold-thread-tip {
+    display: none;
+    position: absolute;
+    top: calc(var(--gt-tip) / -2);
+    left: calc(var(--gt-tip) / -2);
+    width: var(--gt-tip);
+    height: var(--gt-tip);
+    border-radius: 50%;
+    background-color: var(--gt-gold);
+    box-shadow:
+      0 0 0 3px #ffc72c33,
+      0 0 14px 4px #ffc72c73;
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .gold-thread-tip {
+      display: block;
+    }
+  }
+</style>

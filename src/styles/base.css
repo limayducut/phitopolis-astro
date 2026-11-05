@@ -1,0 +1,120 @@
+/* App-shell baseline: fresko theme/components.ts MuiCssBaseline overrides
+   and the AppShell layout boxes. */
+
+.contents {
+  display: contents;
+}
+
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+/* SheetMain: on "/" the page ground is the theme default (NOIR.void). */
+.sheet-main {
+  position: relative;
+  flex-grow: 1;
+  outline: none;
+  background-color: var(--g-void);
+}
+
+/* routes/index.tsx HomePage wrapper */
+.home-main {
+  position: relative;
+  overflow-x: clip;
+}
+
+/* Focus ring: secondary (gold) outline + ground-aware halo. */
+*:focus-visible {
+  outline: 2px solid #ffc72c;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus-halo);
+  border-radius: var(--r-control);
+}
+
+/* Skip link: glass tab off the top edge until focused. */
+.skip-to-content {
+  display: inline-block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1510; /* MUI zIndex.tooltip (1500) + 10 */
+  padding: 12px 24px;
+  background-color: var(--glass-under);
+  background-image: linear-gradient(var(--glass-fill-3), var(--glass-fill-3));
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border-2);
+  border-top: none;
+  color: var(--text-1);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom-right-radius: var(--r-control);
+  box-shadow: none;
+  transform: translateY(-120%);
+}
+
+.skip-to-content:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid #ffc72c;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus-halo);
+  border-radius: var(--r-control);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skip-to-content {
+    transition: transform 0.2s ease-out;
+  }
+}
+
+/* Scrollbars (navy pill). */
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scroll-thumb, rgba(10, 42, 102, 0.55));
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-thumb-hover, rgba(10, 42, 102, 0.9));
+}
+
+/* While OverlayScrollbar is active the root's native scrollbar goes away. */
+html.has-overlay-scrollbar,
+html.has-overlay-scrollbar body {
+  scrollbar-width: none;
+}
+
+html.has-overlay-scrollbar::-webkit-scrollbar,
+html.has-overlay-scrollbar body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  html,
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb, rgba(10, 42, 102, 0.55)) transparent;
+  }
+}

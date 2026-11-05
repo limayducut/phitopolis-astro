@@ -1,0 +1,208 @@
+---
+// HomeOpening.tsx (HomeResearchHero): a static 200svh hold whose sticky plate
+// carries the street film, the headline and the CTA; the narration below is
+// pulled up one viewport (negative margin) and rises over it.
+// Behaviour: src/fresko/features/home/rebuild/HomeOpening.ts.
+import HomeFrame from "./HomeFrame.astro";
+import CtaButton from "../chrome/CtaButton.astro";
+import { TAGLINE } from "@/shared/components/preloaderChoreo";
+import { HOME_HERO_HOLD_SVH, HOME_HERO_OVERLAP_SVH } from "@/features/home/rebuild/homeFlow";
+import { HOME_HERO_FILM_OPACITY, HOME_HERO_SCRIM } from "@/shared/theme/heroFilm";
+import { HERO_OPENING_FILM, HERO_PHONE_QUERY } from "@/shared/components/useBackgroundVideo";
+
+const ACCENT_PHRASE = "available today";
+const at = TAGLINE.lastIndexOf(ACCENT_PHRASE);
+const HEADLINE = at < 0 ? { before: TAGLINE, accent: "" } : { before: TAGLINE.slice(0, at), accent: TAGLINE.slice(at) };
+const HERO_FILM_SRC = `${HERO_OPENING_FILM.mp4}#t=${HERO_OPENING_FILM.startAt}`;
+---
+<HomeFrame id="hero-sequence" style={`margin-bottom: -${HOME_HERO_OVERLAP_SVH}svh;`}>
+  <!-- Static hold: the sticky plate below sticks across this range. -->
+  <div class="hero-hold" style={`height: ${HOME_HERO_HOLD_SVH}svh;`}>
+    <div class="hero-plate">
+      <div class="hero-plate-inner" data-hero-container>
+        <div class="hero-film" aria-hidden="true" style={`opacity: ${HOME_HERO_FILM_OPACITY};`} data-playing="false">
+          <!-- src is attached by script (eager, past the logo card); removed when the still is wanted. -->
+          <video
+            class="hero-film-layer hero-film-video"
+            data-hero-video
+            data-src={HERO_FILM_SRC}
+            data-playing="false"
+            muted
+            playsinline
+            autoplay
+            preload="auto"
+            aria-hidden="true"
+          ></video>
+          <picture>
+            <source media={HERO_PHONE_QUERY} srcset={HERO_OPENING_FILM.phoneStill} />
+            <img
+              class="hero-film-layer hero-film-still"
+              src={HERO_OPENING_FILM.poster}
+              alt=""
+              decoding="async"
+              data-hero-film-still=""
+            />
+          </picture>
+        </div>
+        <div class="hero-scrim" style={`background: ${HOME_HERO_SCRIM};`}></div>
+        <div class="hero-copy">
+          <div class="hero-cascade hero-cascade--headline" data-cascade-step="2">
+            <h1 class="hero-title">
+              {HEADLINE.before}<span class="hero-accent">{HEADLINE.accent}</span>
+            </h1>
+          </div>
+          <div class="hero-cascade" data-cascade-step="3">
+            <div style="display: contents;" data-hero-cta>
+              <CtaButton href="#" label="Start a conversation" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Mission's arrival curtain darkens this layer (a sibling of the inner plate). -->
+      <div class="hero-plate-scrim" aria-hidden="true"></div>
+    </div>
+  </div>
+</HomeFrame>
+
+<style is:global>
+  .hero-plate {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .hero-plate-inner {
+    position: relative;
+    height: 100svh;
+    overflow: hidden;
+    background-color: #0a1833; /* NOIR.navyPanel */
+  }
+
+  .hero-film {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-film-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-film-video[hidden] {
+    display: none;
+  }
+
+  /* HIDE_NATIVE_PLAY_CONTROLS_SX */
+  .hero-film-video::-webkit-media-controls,
+  .hero-film-video::-webkit-media-controls-start-playback-button,
+  .hero-film-video::-webkit-media-controls-overlay-play-button,
+  .hero-film-video::-webkit-media-controls-panel {
+    display: none !important;
+    -webkit-appearance: none;
+  }
+
+  /* filmStillSx(playing, reduced): the still sits over the film until it really plays. */
+  .hero-film-still {
+    opacity: 1;
+    transition: opacity 0.9s ease;
+    pointer-events: none;
+  }
+  .hero-film[data-playing="true"] .hero-film-still {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-film-still {
+      transition: none;
+    }
+  }
+
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* homeInset (px 3/5/8, py 8/12) then the hero's own pt/pb. */
+  .hero-copy {
+    position: relative;
+    padding: 108px 24px clamp(20px, 4svh, 40px);
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 48px;
+  }
+  @media (min-width: 600px) {
+    .hero-copy {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+  @media (min-width: 900px) {
+    .hero-copy {
+      padding: 120px 64px clamp(24px, 4svh, 44px);
+      gap: 64px;
+    }
+  }
+
+  /* HeroCascadeStep: opacity/translateY, shown once the cascade reaches its step. */
+  .hero-cascade {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hero-cascade--headline {
+    transition:
+      opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hero-cascade[data-shown="false"],
+  html[data-intro="on"] .hero-cascade:not([data-shown]) {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  .hero-cascade--headline[data-shown="false"],
+  html[data-intro="on"] .hero-cascade--headline:not([data-shown]) {
+    transform: translateY(28px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-cascade {
+      transition: none;
+    }
+  }
+
+  /* Typography h1 + homeTypeSx("display") + wide maxWidth/balance. */
+  .hero-title {
+    margin: 0;
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: clamp(2.5rem, 10.5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  @media (min-width: 768px) {
+    .hero-title {
+      font-size: clamp(3rem, 5.4vw, 6rem);
+      max-width: 10.5em;
+    }
+  }
+
+  .hero-accent {
+    color: #ffc72c; /* NOIR.gold */
+  }
+
+  .hero-plate-scrim {
+    position: absolute;
+    inset: 0;
+    background-color: #061226; /* NOIR.navyInk */
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>

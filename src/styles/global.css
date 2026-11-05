@@ -1,0 +1,218 @@
+/* Phitopolis — global tokens and base styles.
+   Values mirror phitopolis-fresko's theme (palette.ts, grounds.ts,
+   editorialType.ts, homeType.ts, glass.css). */
+
+@font-face {
+  font-family: "Outfit";
+  src: url("/fonts/outfit-latin-wght.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-wght.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Brand */
+  --gold: #ffc72c;
+  --gold-light: #ffd966;
+  --gold-dark: #e5b228;
+  --legacy-gold: #ddb214;
+  --gold-rgb: 255, 199, 44;
+
+  /* Navy family */
+  --navy-field: #0a2a66;
+  --navy-field-rgb: 10, 42, 102;
+  --navy-dark: #081f4d;
+  --navy-deep: #06183b;
+  --navy-deep-rgb: 6, 24, 59;
+  --navy-panel: #0a1833;
+  --navy-panel-rgb: 10, 24, 51;
+  --navy-ink: #061226;
+  --navy-ink-rgb: 6, 18, 38;
+  --navy-floor: #04122e;
+
+  /* Light */
+  --frost: #f4f7fc;
+  --frost-rgb: 244, 247, 252;
+  --white: #ffffff;
+  --slate: #94a3b8;
+  --closing-panel: #e6e9ef;
+
+  /* Grounds (dark "base" ground is the page default) */
+  --ground-bg: var(--navy-ink);
+  --ground-fg: var(--frost);
+  --ground-muted: rgba(255, 255, 255, 0.7);
+  --ground-rule: rgba(255, 255, 255, 0.12);
+
+  /* Type */
+  --font-display: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --t-small: 0.8rem;
+  --t-body: 1rem;
+  --t-lead: 1.25rem;
+  --t-h4: 1.5625rem;
+  --t-h3: 1.953rem;
+  --t-h2: 2.441rem;
+  --t-h1: 3.052rem;
+
+  /* Layout: home inset (MUI spacing 3 / 5 / 8) */
+  --inset-x: 24px;
+  --inset-y: 64px;
+  --nav-h: 72px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 0.2s;
+  --r-control: 12px;
+
+  color-scheme: dark;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --inset-x: 40px;
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --inset-x: 64px;
+    --inset-y: 96px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* MUI CssBaseline + the theme's body1 (theme.ts / components.ts). */
+body {
+  margin: 0;
+  background-color: var(--g-void);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* MUI Typography renders every heading/paragraph with margin 0. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+::selection {
+  color: var(--navy-field);
+  background-color: var(--gold);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Home type roles (homeType.ts). Switch at 768px with the motion. ── */
+.t-display,
+.t-display-inner,
+.t-statement,
+.t-beat,
+.t-deck,
+.t-label {
+  font-family: var(--font-display);
+}
+
+.t-display {
+  font-size: clamp(2.5rem, 10.5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.t-display-inner {
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.t-statement {
+  font-size: var(--t-h3);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.t-beat {
+  font-size: var(--t-lead);
+  font-weight: 500;
+  line-height: 1.16;
+  letter-spacing: -0.025em;
+}
+
+.t-deck {
+  font-size: var(--t-lead);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.t-label {
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+@media (min-width: 768px) {
+  .t-display {
+    font-size: clamp(3rem, 5.4vw, 6rem);
+  }
+  .t-display-inner {
+    font-size: clamp(2.25rem, 4vw, 3.75rem);
+  }
+  .t-statement {
+    font-size: clamp(var(--t-h3), 3.6vw, var(--t-h1));
+  }
+  .t-beat {
+    font-size: clamp(var(--t-h4), 2.7vw, var(--t-h2));
+  }
+  .t-deck {
+    font-size: clamp(var(--t-lead), 2.25vw, var(--t-h4));
+  }
+}
+
+/* The CTA (.cta) lives in src/components/chrome/CtaButton.astro. */
+
+/* [data-reveal] entrances are driven by GSAP (features/home/rebuild/useHomeReveal.ts):
+   lit by default, hidden only by the script for elements still below the fold. */

@@ -1,0 +1,561 @@
+---
+// SiteNavbar.tsx, ported. Behaviour (states, stagger, hover pill, autohide,
+// motto, --nav-h) lives in src/fresko/shared/components/SiteNavbar.ts.
+//
+// State attributes on the header (all written by the script):
+//   data-gated      preloader up or hero cascade < 2 → hidden, inert to pointer
+//   data-hidden     autohide (or gated) → translateY(-120%)
+//   data-revealed   header released → items run their staggered entrance
+//   data-floating   scrolled past the hero → compact bar (+ glass surface)
+//   data-dark       over a dark ground (store.overDark)
+//   data-bg         glass | none | fade (store.navBgMode)
+//   data-motto      the tagline under the wordmark (Alt+M)
+import Logo from "./Logo.astro";
+import CtaButton from "./CtaButton.astro";
+import { MEGA_NAV_ITEMS } from "../../fresko/shared/components/megaNavItems";
+import { TAGLINE } from "../../fresko/shared/components/preloaderChoreo";
+import "../../fresko/shared/components/siteNavbar.css";
+
+// The navbar's own link order (Contact is the gold button on the right).
+const NAV_ORDER = ["/", "/about", "/careers", "/blog"] as const;
+const NAV_ITEMS = NAV_ORDER.map((to) => MEGA_NAV_ITEMS.find((item) => item.to === to)).filter(
+  (item): item is NonNullable<typeof item> => item !== undefined,
+);
+const CONTACT_LABEL = MEGA_NAV_ITEMS.find((item) => item.to === "/contact")?.label ?? "Contact";
+// Home-only build: "/" is real, every other route is "#".
+const hrefFor = (to: string) => (to === "/" ? "/" : "#");
+
+// Progressive-blur ("fade") layers: six stacked backdrop blurs (SiteNavbar.tsx).
+const FADE_BLUR_RADII_PX = [1, 2, 4, 8, 14, 20] as const;
+const FADE_RAMP_PCT = 72;
+const FADE_STEP_PCT = FADE_RAMP_PCT / FADE_BLUR_RADII_PX.length;
+const pct = (n: number) => `${Number(n.toFixed(2))}%`;
+function fadeBlurMask(k: number): string {
+  const last = k === FADE_BLUR_RADII_PX.length - 1;
+  const clear = "rgba(0,0,0,0)";
+  const stops = [`${clear} ${pct(k * FADE_STEP_PCT)}`, `#000 ${pct((k + 1) * FADE_STEP_PCT)}`];
+  if (last) stops.push("#000 100%");
+  else stops.push(`#000 ${pct((k + 2) * FADE_STEP_PCT)}`, `${clear} ${pct((k + 3) * FADE_STEP_PCT)}`);
+  return `linear-gradient(to top, ${stops.join(", ")})`;
+}
+const FADE_TINT_MASK =
+  "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.85) 20%, rgba(0,0,0,0.62) 40%, rgba(0,0,0,0.3) 62%, rgba(0,0,0,0.08) 82%, rgba(0,0,0,0) 100%)";
+
+// Stagger (motion variants): top group staggers 0.04s over [logo, links, right];
+// links add delayChildren 0.08, the right cluster 0.32, each staggering 0.04s.
+const delay = (s: number) => `--d: ${Number(s.toFixed(2))}s`;
+---
+<header
+  class="site-nav"
+  data-nav
+  data-gated="true"
+  data-hidden="true"
+  data-revealed="false"
+  data-floating="false"
+  data-dark="true"
+  data-bg="glass"
+  data-motto="false"
+>
+  <div class="site-nav__bar" data-nav-bar data-floating="false" data-dark="true" data-bg="glass" data-hidden="true">
+    <span class="site-nav__fade" aria-hidden="true" data-nav-fade>
+      <span class="site-nav__fade-tint" style={`--fade-mask: ${FADE_TINT_MASK}`}></span>
+      {
+        FADE_BLUR_RADII_PX.map((radius, k) => (
+          <span
+            class="site-nav__fade-blur"
+            style={`--fade-blur: ${radius}px; --fade-mask: ${fadeBlurMask(k)}`}
+          />
+        ))
+      }
+    </span>
+    <div class="site-nav__inner">
+      <!-- Logo -->
+      <div class="site-nav__item site-nav__logo-item" data-nav-item style={delay(0)}>
+        <a class="site-nav__brand" href="/" aria-label="Phitopolis home">
+          <span class="site-nav__mark-wrap">
+            <Logo class="site-nav__mark" />
+          </span>
+          <span class="site-nav__lockup">
+            <span class="site-nav__wordmark">PH<span class="site-nav__wordmark-gold">IT</span>OPOLIS</span>
+            <span class="site-nav__motto">{TAGLINE}</span>
+          </span>
+        </a>
+      </div>
+
+      <!-- Centre links -->
+      <nav class="site-nav__links" aria-label="Primary">
+        <ul class="site-nav__list" data-nav-list>
+          <span class="site-nav__pill" aria-hidden="true" data-nav-pill></span>
+          {
+            NAV_ITEMS.map((link, i) => (
+              <li class="site-nav__item site-nav__li" data-nav-item style={delay(0.04 + 0.08 + i * 0.04)}>
+                <a
+                  class:list={["site-nav__link", { "is-active": link.to === "/" }]}
+                  href={hrefFor(link.to)}
+                  aria-current={link.to === "/" ? "page" : undefined}
+                  data-nav-link
+                >
+                  {link.label}
+                  {link.to === "/" && <span class="site-nav__indicator" aria-hidden="true" />}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <!-- Right cluster -->
+      <div class="site-nav__right">
+        <div class="site-nav__item" data-nav-item style={delay(0.08 + 0.32)}>
+          <div class="site-nav__contact-wrap">
+            <CtaButton href="#" label={CONTACT_LABEL} class="site-nav__contact" />
+          </div>
+        </div>
+        <div class="site-nav__item" data-nav-item style={delay(0.08 + 0.32 + 0.04)}>
+          <button
+            class="site-nav__menu"
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            data-menu-toggle
+          >
+            <span class="site-nav__menu-icon" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Fallback entry: boot.ts normally runs initChrome(); if any other part of
+  // the boot graph fails to load, the chrome still comes up.
+  import { initChrome } from "../../fresko/ports/chrome";
+  document.addEventListener("DOMContentLoaded", () => initChrome());
+</script>
+
+<style is:global>
+  /* ── Header shell (fresko sx on the <header>) ───────────────── */
+  .site-nav {
+    --site-nav-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --ink: #ffffff;
+    --ink-muted: rgba(255, 255, 255, 0.72);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1100;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 1;
+    transform: translateY(0%);
+    transition:
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.5s ease;
+  }
+
+  .site-nav[data-dark="false"] {
+    --ink: #0a2a66;
+    --ink-muted: rgba(10, 42, 102, 0.72);
+  }
+
+  .site-nav[data-gated="true"] {
+    opacity: 0;
+  }
+
+  .site-nav[data-hidden="true"] {
+    transform: translateY(-120%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav {
+      transition: opacity 0.3s ease;
+    }
+  }
+
+  /* ── Bar ─────────────────────────────────────────────────────── */
+  .site-nav .site-nav__bar {
+    width: 100%;
+    pointer-events: auto;
+    background-color: rgba(255, 255, 255, 0);
+  }
+
+  .site-nav[data-gated="true"] .site-nav__bar {
+    pointer-events: none;
+  }
+
+  .site-nav .site-nav__bar[data-floating="true"][data-bg="glass"] {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+
+  .site-nav .site-nav__bar[data-floating="true"][data-bg="glass"][data-dark="true"] {
+    background-color: rgba(6, 24, 59, 0.9);
+  }
+
+  .site-nav .site-nav__bar:not([data-bg="fade"]) .site-nav__fade {
+    display: none;
+  }
+
+  .site-nav__fade-tint {
+    background-color: rgb(255, 255, 255);
+  }
+
+  .site-nav__bar[data-dark="true"] .site-nav__fade-tint {
+    background-color: rgb(6, 24, 59);
+  }
+
+  /* ── Inner grid ──────────────────────────────────────────────── */
+  .site-nav__inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    min-height: 72px;
+    padding: 16px 24px;
+    transition:
+      min-height 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      padding 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      max-width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .site-nav[data-floating="true"] .site-nav__inner {
+    min-height: 56px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  @media (min-width: 600px) {
+    .site-nav__inner {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .site-nav__inner {
+      grid-template-columns: 1fr auto 1fr;
+      padding-left: 64px;
+      padding-right: 64px;
+    }
+  }
+
+  /* ── Staggered entrance (motion variants item / group) ───────── */
+  .site-nav__item {
+    opacity: 1;
+    transform: none;
+    filter: blur(0px);
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+      filter 0.6s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s);
+  }
+
+  .site-nav[data-revealed="false"] .site-nav__item {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav__item {
+      transition: opacity 0.3s ease;
+    }
+    .site-nav[data-revealed="false"] .site-nav__item {
+      transform: none;
+      filter: none;
+    }
+  }
+
+  .site-nav__logo-item {
+    justify-self: start;
+  }
+
+  /* ── Logo lockup ─────────────────────────────────────────────── */
+  .site-nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -4px;
+    padding: 4px;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  .site-nav__mark-wrap {
+    display: flex;
+    color: var(--ink);
+    transition: color 0.4s ease;
+  }
+
+  .site-nav__mark {
+    width: auto;
+    height: 24px;
+    transition: height 0.4s ease;
+  }
+
+  .site-nav__mark path {
+    transition: fill 300ms ease;
+  }
+
+  .site-nav[data-floating="true"] .site-nav__mark {
+    height: 20px;
+  }
+
+  .site-nav[data-motto="true"] .site-nav__mark {
+    height: calc(1.265rem + 0.754rem + 0.8px);
+  }
+
+  .site-nav[data-motto="true"][data-floating="true"] .site-nav__mark {
+    height: calc(1.1rem + 0.754rem + 0.8px);
+  }
+
+  .site-nav__lockup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8px;
+  }
+
+  .site-nav__wordmark {
+    margin: 0;
+    color: var(--ink);
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    transition:
+      color 0.4s ease,
+      font-size 0.4s ease;
+  }
+
+  .site-nav[data-floating="true"] .site-nav__wordmark {
+    font-size: 1rem;
+  }
+
+  .site-nav__wordmark-gold {
+    color: #ffc72c;
+  }
+
+  .site-nav__motto {
+    display: none;
+    margin: 0;
+    color: var(--ink-muted);
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.58rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .site-nav[data-motto="true"] .site-nav__motto {
+    display: block;
+  }
+
+  /* ── Centre links ────────────────────────────────────────────── */
+  .site-nav__links {
+    display: none;
+    justify-self: center;
+  }
+
+  @media (min-width: 900px) {
+    .site-nav__links {
+      display: flex;
+    }
+  }
+
+  .site-nav__list {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-nav__li {
+    position: relative;
+    z-index: 1;
+  }
+
+  .site-nav__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: var(--ink-muted);
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.65;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .site-nav__link:hover,
+  .site-nav__link.is-active {
+    color: var(--ink);
+  }
+
+  /* Hit area */
+  .site-nav__link::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+  }
+
+  /* The hover pill (motion layoutId "siteNavHoverPill" → one sprung element). */
+  .site-nav__pill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    height: 36px;
+    width: 0;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .site-nav[data-dark="false"] .site-nav__pill {
+    background-color: rgba(10, 42, 102, 0.07);
+  }
+
+  .site-nav__pill[data-on="true"] {
+    opacity: 1;
+  }
+
+  /* The active indicator (layoutId "siteNavActiveIndicator"). */
+  .site-nav__indicator {
+    position: absolute;
+    left: 50%;
+    bottom: 3px;
+    width: 14px;
+    height: 2px;
+    margin-left: -7px;
+    border-radius: 2px;
+    background-color: #ffc72c;
+    box-shadow: 0 0 8px rgba(255, 199, 44, 0.7);
+  }
+
+  /* ── Right cluster ───────────────────────────────────────────── */
+  .site-nav__right {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .site-nav__contact-wrap {
+    display: none;
+  }
+
+  @media (min-width: 900px) {
+    .site-nav__contact-wrap {
+      display: block;
+    }
+  }
+
+  .cta.site-nav__contact {
+    min-height: 35px;
+    height: 35px;
+    padding: 0 36px;
+    font-size: 0.78rem;
+  }
+
+  .site-nav__menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+      background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .site-nav[data-dark="false"] .site-nav__menu {
+    border-color: rgba(10, 42, 102, 0.16);
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .site-nav__menu:hover {
+    border-color: rgba(255, 199, 44, 0.7);
+    background-color: rgba(255, 255, 255, 0.14);
+  }
+
+  .site-nav[data-dark="false"] .site-nav__menu:hover {
+    border-color: rgba(255, 199, 44, 0.7);
+    background-color: rgba(10, 42, 102, 0.07);
+  }
+
+  .site-nav .site-nav__menu[aria-expanded="true"],
+  .site-nav .site-nav__menu[aria-expanded="true"]:hover {
+    background-color: #ffc72c;
+    color: #061226;
+  }
+
+  .site-nav__menu::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+  }
+
+  @media (min-width: 900px) {
+    .site-nav__menu {
+      display: none;
+    }
+  }
+
+  .site-nav__menu-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 20px;
+    height: 12px;
+    pointer-events: none;
+  }
+
+  .site-nav__menu-icon span {
+    width: 18px;
+    height: 2px;
+    border-radius: 1px;
+    background-color: currentColor;
+    transition: background-color 0.3s ease;
+  }
+
+  .site-nav__menu-icon span:nth-child(2) {
+    width: 12px;
+    align-self: flex-end;
+    margin-right: 1px;
+  }
+</style>

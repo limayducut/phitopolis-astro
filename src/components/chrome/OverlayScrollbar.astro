@@ -1,0 +1,38 @@
+---
+// OverlayScrollbar.tsx: a transparent fixed rail on the right edge carrying
+// a navy thumb — the page scrollbar without the gutter. Mounted only while
+// active (fine pointer + a real native gutter); the script decides.
+// z-index: theme.zIndex.appBar + 1. Thumb colours: SCROLL_THUMB(_HOVER).
+import "../../fresko/shared/components/OverlayScrollbar.css";
+---
+<div
+  class="overlay-scrollbar"
+  aria-hidden="true"
+  data-testid="overlay-scrollbar"
+  data-overlay-scrollbar
+  hidden
+  style="z-index: 1101; --overlay-scrollbar-thumb: rgba(10, 42, 102, 0.55); --overlay-scrollbar-thumb-hover: rgba(10, 42, 102, 0.9);"
+>
+  <div class="overlay-scrollbar__thumb" data-testid="overlay-scrollbar-thumb"></div>
+</div>
+
+<style is:global>
+  /* theme/components.ts: while the overlay is in charge the root's native
+     scrollbar goes away entirely (no gutter painted in the canvas colour). */
+  html.has-overlay-scrollbar,
+  html.has-overlay-scrollbar body {
+    scrollbar-width: none;
+  }
+
+  html.has-overlay-scrollbar::-webkit-scrollbar,
+  html.has-overlay-scrollbar body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  /* Off until the script decides the overlay is active. */
+  .overlay-scrollbar:not([data-active]) {
+    display: none;
+  }
+</style>

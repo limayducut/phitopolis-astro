@@ -1,0 +1,34 @@
+/* Outfit — self-hosted (SIL OFL 1.1), the single sitewide font. */
+@font-face {
+  font-family: "Outfit";
+  src: url("../../assets/fonts/outfit/outfit-latin-wght.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Inter — self-hosted */
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/inter/inter-latin-wght.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* REMOVED: `html { scroll-snap-type: y proximity }`.
+   The comment here claimed "only About's own sections carry scroll-snap-align —
+   inert everywhere else", but `scroll-snap-align` appears nowhere in src/. The
+   declaration had no snap targets at all, so it bought nothing while making the
+   root a snap container on every route — and root-level snap combined with Lenis
+   smooth scroll and GSAP pinning is a known source of scroll jank on low-end
+   devices. If the About transition wants snapping again, scope the container to
+   that page and give its sections a scroll-snap-align. */
+
+/* View Transitions respect reduced motion explicitly. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

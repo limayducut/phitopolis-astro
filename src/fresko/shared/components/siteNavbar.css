@@ -1,0 +1,130 @@
+/* SiteNavbar — full-width glass bar, bottom hairline, cursor-proximity glass
+   glow and CTA sheen sweep. Everything here animates transform/opacity only. */
+
+/* --nav-h is published by SiteNavbar (ResizeObserver on the bar element);
+   --nav-clear is what in-page sticky bars actually read — it collapses to 0
+   when the navbar autohides so they can rise to meet it. See
+   stickyBelowNav.ts. */
+:root {
+  --nav-clear: var(--nav-h, 72px);
+}
+:root[data-nav-hidden="true"] {
+  --nav-clear: 0px;
+}
+
+.site-nav__bar {
+  position: relative;
+  isolation: isolate;
+  transition:
+    background-color 0.6s var(--site-nav-ease),
+    box-shadow 0.6s var(--site-nav-ease);
+  /* backdrop-filter is deliberately not transitioned: a blur recomputes on every
+     frame of the transition (see --t-glass in theme/glass.css). */
+}
+
+/* Glass (default): the frosted slab. "none" and "fade" never match these rules,
+   so the bar itself stays clear — no blur, no shadow, no hairline. */
+.site-nav__bar[data-bg="glass"][data-floating="true"] {
+  /* Same 20px / 160% as ever, but read through the low-power gate: glass.css
+     sets --nav-blur to 0px and --glass-saturate to 100% when the gate is off.
+     min() caps the shared token (30px) at this bar's own 20px. */
+  -webkit-backdrop-filter: blur(min(var(--nav-blur, 20px), 20px))
+    saturate(var(--glass-saturate, 160%));
+  backdrop-filter: blur(min(var(--nav-blur, 20px), 20px)) saturate(var(--glass-saturate, 160%));
+  box-shadow: 0 4px 16px -10px rgba(6, 18, 38, 0.08);
+}
+
+/* Gated off (low power or reduced motion): drop the filter entirely rather than
+   run an identity blur(0px) saturate(100%) every frame. */
+html[data-glass="off"] .site-nav__bar[data-bg="glass"][data-floating="true"] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Thin bottom hairline across the full width (scrolled state only). */
+.site-nav__bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--site-nav-ease);
+  background: linear-gradient(
+    90deg,
+    rgba(10, 42, 102, 0.06),
+    rgba(10, 42, 102, 0.16) 50%,
+    rgba(10, 42, 102, 0.06)
+  );
+}
+
+.site-nav__bar[data-dark="true"]::before {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.06)
+  );
+}
+
+.site-nav__bar[data-bg="glass"][data-floating="true"]::before {
+  opacity: 1;
+}
+
+/* Fade (progressive blur): a pointer-less layer behind the bar content (inside
+   the bar's isolation context) that reaches --fade-extend below the bar. It is
+   a ground-colour tint (alpha ramp in its mask) plus stacked backdrop-blur
+   layers whose masks (set per layer in SiteNavbar) ramp the blur from the top
+   edge down to nothing. The container itself carries no opacity/mask/filter —
+   any of those would make it a backdrop root and the blur would see nothing —
+   so each layer fades in on its own (opacity only). */
+.site-nav__fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(100% + var(--fade-extend, 32px));
+  z-index: -1;
+  pointer-events: none;
+}
+
+.site-nav__fade > * {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  -webkit-mask-image: var(--fade-mask);
+  mask-image: var(--fade-mask);
+  transition:
+    opacity 0.6s var(--site-nav-ease),
+    background-color 0.6s var(--site-nav-ease);
+}
+
+.site-nav__fade-blur {
+  -webkit-backdrop-filter: blur(var(--fade-blur));
+  backdrop-filter: blur(var(--fade-blur));
+}
+
+/* Same gate for the progressive-blur layers: six stacked backdrop blurs are the
+   costliest thing in fade mode. The ground-colour tint layer stays. */
+html[data-glass="off"] .site-nav__fade-blur {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.site-nav__bar[data-floating="true"] .site-nav__fade > * {
+  opacity: 1;
+}
+/* The header hides with translateY(-120%) of its own height, which does not
+   include the fade's 32px extension, so the tail would stay on screen as a
+   hazy strip. Fade the layers out with the header instead. */
+.site-nav__bar[data-hidden="true"] .site-nav__fade > * {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav__fade > * {
+    transition: none;
+  }
+}

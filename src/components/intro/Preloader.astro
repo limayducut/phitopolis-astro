@@ -1,0 +1,439 @@
+---
+// Preloader.tsx's markup, server-rendered so the intro covers the page from
+// the very first paint. Shown only when html[data-intro="on"] (an inline head
+// script in BaseLayout mirrors preloaderGate). The choreography runs from
+// src/fresko/shared/components/preloader/runPreloader.ts (startPreloader).
+//
+// Every element's rest style here equals its first tween's FROM value, as in
+// fresko, so a delayed tween never flashes a wrong frame.
+import { PHITOPOLIS_MARK_PATHS, PHITOPOLIS_MARK_VIEWBOX } from "../../fresko/shared/components/phitopolisMarkPaths";
+import {
+  ACCENT_FROM_SCALE,
+  BAR_COUNT,
+  DOT_COUNT,
+  FAILSAFE_MS,
+  STATEMENT_LINES,
+  WORDMARK,
+  WORDMARK_GOLD,
+} from "../../fresko/shared/components/preloaderChoreo";
+import { MARK_ASPECT } from "../../fresko/shared/components/intro/diveGeometry";
+import { accentCentreFraction, terminalFraction } from "../../fresko/shared/components/intro/dotAnchors";
+import {
+  GAPS,
+  GAPS_SHORT,
+  LINE_H_PX,
+  LINE_W_PX,
+  MARK_H,
+  MARK_H_NARROW,
+  MARK_H_SHORT,
+  MOTTO_SIZE_CSS,
+  PERCENT_GAP_PX,
+  READOUT_SHIFT_PX,
+  WORD_SIZE_CSS,
+} from "../../fresko/shared/components/intro/introLayout";
+import { barTransform, revealClip, riseTransform } from "../../fresko/shared/components/intro/introPose";
+import { DOT_DIAMETER_CSS } from "../../fresko/shared/components/preloader/introDots";
+
+const motto = STATEMENT_LINES.find((l) => l.id === "tagline")?.text ?? "";
+const accentOrigin = accentCentreFraction();
+const gold = WORDMARK_GOLD as readonly number[];
+
+const rootVars = [
+  `--mark-h-wide: ${MARK_H}`,
+  `--mark-h-narrow: ${MARK_H_NARROW}`,
+  `--mark-h-short: ${MARK_H_SHORT}`,
+  `--mark-w: calc(var(--mark-h) * ${MARK_ASPECT.toFixed(5)})`,
+  `--word-size: ${WORD_SIZE_CSS}`,
+  `--motto-size: ${MOTTO_SIZE_CSS}`,
+  `--gap-word-k: ${GAPS.word}`,
+  `--gap-motto-k: ${GAPS.motto}`,
+  `--gap-line-k: ${GAPS.line}`,
+  `--gap-word-k-short: ${GAPS_SHORT.word}`,
+  `--gap-motto-k-short: ${GAPS_SHORT.motto}`,
+  `--gap-line-k-short: ${GAPS_SHORT.line}`,
+  `--intro-rise0: ${riseTransform(0)}`,
+  `--intro-clip0: ${revealClip(0)}`,
+].join("; ");
+
+const markLayer = (accent: boolean) => PHITOPOLIS_MARK_PATHS.filter((p) => p.accent === accent);
+---
+<div class="phit-intro" data-testid="preloader" data-intro-root data-progress="0" style={rootVars}>
+  <!-- THE OPENING — a white page of six bars that flip away to show the navy; removed after. -->
+  <div class="phit-intro__bars" aria-hidden="true" data-intro-bars="">
+    {
+      Array.from({ length: BAR_COUNT }, (_, i) => (
+        <div
+          class="phit-intro__bar"
+          data-intro-bar={i}
+          style={`top: ${((i * 100) / BAR_COUNT).toFixed(4)}%; height: calc(${(100 / BAR_COUNT).toFixed(4)}% + 1px); transform: ${barTransform(0)}`}
+        />
+      ))
+    }
+  </div>
+
+  <!-- THE VIGNETTE — faint, fades in over the void, leaves with the content. -->
+  <div class="phit-intro__vignette" aria-hidden="true" data-intro-vignette=""></div>
+
+  <!-- THE LOCKUP — one group, centred as a group: mark, wordmark, motto, line. -->
+  <div class="phit-intro__lockup">
+    <div class="phit-intro__mark" data-intro-mark-box="">
+      <div class="phit-intro__fill" data-intro-breathe="">
+        <div class="phit-intro__fill phit-intro__p" data-intro-p="">
+          <svg viewBox={PHITOPOLIS_MARK_VIEWBOX} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" class="phit-intro__svg">
+            {markLayer(false).map((p) => <path fill="#F4F7FC" transform={p.transform} d={p.d} />)}
+          </svg>
+        </div>
+        <div
+          class="phit-intro__fill phit-intro__accent"
+          data-intro-accent=""
+          style={`transform: scale(${ACCENT_FROM_SCALE}); transform-origin: ${(accentOrigin.fx * 100).toFixed(3)}% ${(accentOrigin.fy * 100).toFixed(3)}%`}
+        >
+          <svg viewBox={PHITOPOLIS_MARK_VIEWBOX} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" class="phit-intro__svg">
+            {markLayer(true).map((p) => <path fill="#FFC72C" transform={p.transform} d={p.d} />)}
+          </svg>
+        </div>
+      </div>
+      <!-- THE DOTS — four, from the corners to the P's white terminals. -->
+      <div class="phit-intro__dots" aria-hidden="true" data-intro-dots="">
+        {
+          Array.from({ length: DOT_COUNT }, (_, i) => {
+            const { fx, fy } = terminalFraction(i);
+            return (
+              <div class="phit-intro__dot" data-intro-dot={i} style={`left: ${(fx * 100).toFixed(4)}%; top: ${(fy * 100).toFixed(4)}%`}>
+                <div
+                  class="phit-intro__dot-core"
+                  data-dot-core=""
+                  style={`width: ${DOT_DIAMETER_CSS}; height: ${DOT_DIAMETER_CSS}; left: calc(${DOT_DIAMETER_CSS} * -0.5); top: calc(${DOT_DIAMETER_CSS} * -0.5)`}
+                />
+              </div>
+            );
+          })
+        }
+      </div>
+    </div>
+
+    <!-- THE WORDMARK + MOTTO. -->
+    <div class="phit-intro__word" data-intro-word="">
+      <h1 class="phit-intro__wordmark" data-intro-wordmark="" aria-label="Phitopolis">
+        {
+          WORDMARK.split("").map((char, i) => (
+            <span aria-hidden="true" class:list={["phit-intro__char", { "phit-intro__char--gold": gold.includes(i) }]}>
+              {char}
+            </span>
+          ))
+        }
+      </h1>
+      <div class="phit-intro__motto-wrap">
+        <p class="phit-intro__motto" data-intro-motto="">{motto}</p>
+      </div>
+    </div>
+
+    <!-- THE LOADING READOUT — a 180 x 2 px bar and a mono percentage hung to its right. -->
+    <div
+      class="phit-intro__progress"
+      aria-hidden="true"
+      data-intro-progress=""
+      style={`left: -${READOUT_SHIFT_PX}px; width: ${LINE_W_PX}px; height: ${LINE_H_PX}px`}
+    >
+      <div class="phit-intro__track" data-intro-track="">
+        <div class="phit-intro__bar-fill" data-intro-fill=""></div>
+      </div>
+      <span class="phit-intro__percent" data-intro-percent="" style={`left: calc(100% + ${PERCENT_GAP_PX}px)`}>000</span>
+    </div>
+  </div>
+
+  <!-- Announced sparingly: "Loading", then "Ready" — not every percent. -->
+  <div role="status" aria-live="polite" class="phit-intro__sr" data-intro-status="">Loading</div>
+
+  <!-- THE SKIP BUTTON — quiet, top right; mounted (unhidden) when it arms at SKIP_AT_S. -->
+  <button type="button" class="phit-intro__skip" aria-label="Skip intro" data-intro-skip="" hidden>Skip</button>
+</div>
+
+<!--
+  BACKSTOP. The overlay is server-rendered, so it must never depend on the page
+  bundle to go away: if the bundle fails before the intro runs (or a running
+  intro somehow outlives its own FAILSAFE_MS), this plain timer — FAILSAFE_MS +
+  2s after parse — first asks a running intro to finish (so the entrance still
+  gets onStartExit / onDone), then removes the overlay itself if it is still up.
+-->
+<script is:inline define:vars={{ backstopMs: FAILSAFE_MS + 2000, eventName: "phit:intro-backstop" }}>
+  window.setTimeout(function () {
+    if (!document.querySelector("[data-intro-root]")) return;
+    document.dispatchEvent(new Event(eventName));
+    var root = document.querySelector("[data-intro-root]");
+    if (!root || root.hasAttribute("data-frozen")) return;
+    root.remove();
+    document.documentElement.dataset.intro = "off";
+    try {
+      sessionStorage.setItem("phitopolis:preloaded", "1");
+    } catch (e) {}
+  }, backstopMs);
+</script>
+
+<style is:global>
+  /* The overlay exists only for a first visit to "/" (html[data-intro="on"]). */
+  html:not([data-intro="on"]) .phit-intro {
+    display: none;
+  }
+
+  .phit-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    /* The first-paint ground; PWindowDive reproduces it exactly in SVG. */
+    background: radial-gradient(ellipse at 50% 42%, #06183b 0%, #061226 78%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    --mark-h: var(--mark-h-wide);
+    --gap-word: calc(var(--mark-h) * var(--gap-word-k));
+    --gap-motto: calc(var(--mark-h) * var(--gap-motto-k));
+    --gap-line: calc(var(--mark-h) * var(--gap-line-k));
+  }
+
+  @media (max-width: 599.95px) {
+    .phit-intro {
+      --mark-h: var(--mark-h-narrow);
+    }
+  }
+
+  @media (max-height: 500px) {
+    .phit-intro {
+      --mark-h: var(--mark-h-short);
+      --gap-word: calc(var(--mark-h) * var(--gap-word-k-short));
+      --gap-motto: calc(var(--mark-h) * var(--gap-motto-k-short));
+      --gap-line: calc(var(--mark-h) * var(--gap-line-k-short));
+    }
+  }
+
+  .phit-intro[data-diving] {
+    background: transparent;
+  }
+
+  .phit-intro[data-exiting],
+  .phit-intro[data-forced] {
+    pointer-events: none;
+  }
+
+  .phit-intro__bars {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .phit-intro__bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: #f4f7fc;
+    transform-origin: 50% 50%;
+    backface-visibility: hidden;
+  }
+
+  .phit-intro__vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(2, 8, 20, 0.5) 100%);
+  }
+
+  .phit-intro__lockup {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+  }
+
+  .phit-intro__mark {
+    position: relative;
+    flex-shrink: 0;
+    height: var(--mark-h);
+    width: var(--mark-w);
+  }
+
+  .phit-intro__fill {
+    position: absolute;
+    inset: 0;
+  }
+
+  .phit-intro__p {
+    opacity: 0;
+    transform: var(--intro-rise0);
+    clip-path: var(--intro-clip0);
+  }
+
+  .phit-intro__accent {
+    opacity: 0;
+  }
+
+  .phit-intro__svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    inset: 0;
+    max-width: none;
+  }
+
+  .phit-intro__dots {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .phit-intro__dot {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .phit-intro__dot-core {
+    position: absolute;
+    border-radius: 50%;
+    background-color: #f4f7fc;
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  .phit-intro__word {
+    margin-top: var(--gap-word);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100vw;
+  }
+
+  .phit-intro__wordmark {
+    margin: 0 -0.32em 0 0;
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 600;
+    font-size: var(--word-size);
+    line-height: 1.1;
+    color: #f4f7fc;
+    letter-spacing: 0.32em;
+    display: flex;
+    clip-path: var(--intro-clip0);
+    transform: var(--intro-rise0);
+  }
+
+  .phit-intro__char {
+    display: inline-block;
+    color: inherit;
+  }
+
+  .phit-intro__char--gold {
+    color: #ffc72c;
+  }
+
+  .phit-intro__motto-wrap {
+    margin-top: var(--gap-motto);
+    padding: 0 24px;
+  }
+
+  .phit-intro__motto {
+    margin: 0;
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
+    font-size: var(--motto-size);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    color: rgba(244, 247, 252, 0.78);
+    text-align: center;
+    max-width: min(92vw, 60ch);
+    text-wrap: balance;
+    clip-path: var(--intro-clip0);
+    transform: var(--intro-rise0);
+  }
+
+  .phit-intro__progress {
+    margin-top: var(--gap-line);
+    position: relative;
+    opacity: 0;
+  }
+
+  .phit-intro__track {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background-color: rgba(244, 247, 252, 0.2);
+  }
+
+  .phit-intro__bar-fill {
+    width: 100%;
+    height: 100%;
+    background-color: #ffc72c;
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+  }
+
+  .phit-intro__percent {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: rgba(244, 247, 252, 0.85);
+  }
+
+  .phit-intro__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .phit-intro__skip {
+    position: absolute;
+    z-index: 2;
+    top: 12px;
+    right: 12px;
+    margin: 0;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #f4f7fc;
+    transition: color 0.2s;
+  }
+
+  .phit-intro__skip[hidden] {
+    display: none;
+  }
+
+  @supports (top: env(safe-area-inset-top)) {
+    .phit-intro__skip {
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+    }
+  }
+
+  .phit-intro__skip:hover {
+    color: #ffc72c;
+  }
+
+  .phit-intro__skip:focus-visible {
+    outline: 1px solid #ffc72c;
+    outline-offset: 2px;
+    color: #ffc72c;
+  }
+</style>

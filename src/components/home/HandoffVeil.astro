@@ -1,0 +1,37 @@
+---
+// VeilLayer.tsx (HandoffVeil): the navy layer over a receiving photo that the
+// incoming handoff point clears (HandoffCarrier writes --veil-x / --veil-r).
+// fresko renders it only when the handoff is on; here it is always in the
+// markup and shown only under html[data-handoff="on"] (set by boot.ts).
+import { NOIR } from "@/shared/theme/palette";
+import {
+  VEIL_ALPHA_PERCENT,
+  VEIL_FEATHER_PX,
+  VEIL_R_VAR,
+  VEIL_X_VAR,
+} from "@/features/home/pipeline/handoffVeilStyle";
+
+interface Props {
+  class: string;
+}
+const { class: className } = Astro.props;
+const veilMask = `radial-gradient(circle at var(${VEIL_X_VAR}, 50%) 0px, transparent 0, transparent var(${VEIL_R_VAR}, -${String(VEIL_FEATHER_PX)}px), ${NOIR.navyInk} calc(var(${VEIL_R_VAR}, -${String(VEIL_FEATHER_PX)}px) + ${String(VEIL_FEATHER_PX)}px))`;
+const style = [
+  `background-color: color-mix(in srgb, ${NOIR.navyInk} ${String(VEIL_ALPHA_PERCENT)}%, transparent)`,
+  `mask-image: ${veilMask}`,
+  `-webkit-mask-image: ${veilMask}`,
+].join("; ");
+---
+<div aria-hidden="true" data-handoff-veil="" class:list={[className, "handoff-veil"]} style={style}></div>
+
+<style is:global>
+  .handoff-veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+  }
+  html[data-handoff="on"] .handoff-veil {
+    display: block;
+  }
+</style>

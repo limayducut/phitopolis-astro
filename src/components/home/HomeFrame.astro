@@ -1,0 +1,96 @@
+---
+// HomeFrame.tsx + SectionBeat.tsx (home sections are all `motion: "scroll"`
+// and `ownsPin`, so SectionBeat renders bare: an empty Container/.stage-inner
+// beside a `.beat-bare-content` holding the section). The flow div carries
+// the navbar anchor (dark ground) and the section's [data-reveal] entrances,
+// wired by initHomeFrames() in src/fresko/features/home/rebuild/HomeFrame.ts.
+import { homeSection, sectionOrder, STAGE_ATTR } from "@/shared/sections";
+import { GROUNDS } from "@/shared/theme/grounds";
+import type { HomeFlowId } from "@/features/home/rebuild/homeFlow";
+
+interface Props {
+  id: HomeFlowId;
+  /** Extra inline style for the section (HomeFrame's `sx`). */
+  style?: string;
+  class?: string;
+}
+
+const { id, style = "", class: className } = Astro.props;
+const section = homeSection(id);
+const ground = GROUNDS[section.ground ?? "base"];
+const z = sectionOrder(id) + 1;
+---
+<section
+  id={section.id}
+  class:list={["home-frame", className]}
+  {...{ [STAGE_ATTR]: "" }}
+  data-home-frame={id}
+  style={`--frame-z: ${z}; --frame-bg: ${ground.bg}; --frame-fg: ${ground.fg}; ${style}`}
+>
+  <div class="beat-container">
+    <div class="stage-inner" style="position: relative; z-index: 1; overflow: visible;">
+      <div class="beat-stack"></div>
+    </div>
+  </div>
+  <div class="beat-bare-content" style="position: relative; width: 100%;">
+    <div data-flow-section={id} data-ground={ground.dark ? "dark" : undefined} class="home-flow">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* SectionBeat root sx, then HomeFrame's overrides (py 0, border 0,
+     position relative, page-order z-index), then the section's own sx
+     (every home section passes minHeight 0). */
+  .home-frame {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+    background-color: var(--frame-bg);
+    color: var(--frame-fg);
+    border-top: 0;
+    border-bottom: 0;
+    overflow: visible;
+    position: relative;
+    z-index: var(--frame-z);
+  }
+
+  /* MUI Container maxWidth="xl" + sx (relative, height 100%, overflow visible). */
+  .home-frame > .beat-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    display: block;
+    padding-left: 16px;
+    padding-right: 16px;
+    position: relative;
+    height: 100%;
+    overflow: visible;
+  }
+  @media (min-width: 600px) {
+    .home-frame > .beat-container {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+  }
+  @media (min-width: 1536px) {
+    .home-frame > .beat-container {
+      max-width: 1536px;
+    }
+  }
+  .home-frame .beat-stack {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home-flow {
+    width: 100%;
+    color: var(--frame-fg);
+  }
+</style>

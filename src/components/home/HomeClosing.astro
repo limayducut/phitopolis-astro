@@ -1,0 +1,227 @@
+---
+// HomeClosing.tsx. Desktop with motion: a (3 + 1)-screen static wrapper with a
+// sticky stage; the delivery film scrubs over a 3-screen span, then the CTA
+// panel slides in from the right while the picture eases left; the last
+// screen holds. Below 768px / reduced motion: film above the panel in flow
+// (phones still scrub; reduced motion shows the poster only).
+// Behaviour: src/fresko/features/home/rebuild/HomeClosing.ts.
+import HomeFrame from "./HomeFrame.astro";
+import HandoffVeil from "./HandoffVeil.astro";
+import CtaButton from "../chrome/CtaButton.astro";
+import { CLOSING_GOLD, CLOSING_STATEMENT } from "@/features/home/pipeline/pipelineCopy";
+import { CLOSING_MEDIA, HOME_PHASES } from "@/features/home/rebuild/homeFlow";
+
+const at = CLOSING_STATEMENT.lastIndexOf(CLOSING_GOLD);
+const parts =
+  at < 0
+    ? { before: CLOSING_STATEMENT, word: "", after: "" }
+    : {
+        before: CLOSING_STATEMENT.slice(0, at),
+        word: CLOSING_GOLD,
+        after: CLOSING_STATEMENT.slice(at + CLOSING_GOLD.length),
+      };
+const vars = [
+  `--closing-run: ${(HOME_PHASES.closing.screens + HOME_PHASES.closing.holdScreens) * 100}svh`,
+  `--closing-span: ${HOME_PHASES.closing.screens * 100}svh`,
+].join("; ");
+---
+<HomeFrame id="closing">
+  <div class="home-closing" data-home-closing style={vars}>
+    <!-- Static desktop ScrollTrigger trigger, sized to the 3 screens alone. -->
+    <div class="home-closing-span" aria-hidden="true"></div>
+    <div class="home-closing-stage">
+      <div class="home-closing-picture">
+        <img
+          src={CLOSING_MEDIA.poster}
+          alt="Phitopolis engineering and delivery film"
+          loading="lazy"
+          decoding="async"
+        />
+        <!-- src attached by script once the hero film can play through, or the section is near. -->
+        <video data-src={CLOSING_MEDIA.video} muted playsinline preload="auto" aria-hidden="true"></video>
+        <HandoffVeil class="home-closing-veil" />
+      </div>
+      <div class="home-closing-cta">
+        <div aria-hidden="true" data-closing-cta-anchor="" class="home-closing-cta-anchor"></div>
+        <h2 data-reveal="wipe" class="home-closing-title">
+          {parts.before}{parts.word ? <span class="home-closing-gold">{parts.word}</span> : null}{parts.after}
+        </h2>
+        <div class="home-closing-actions">
+          <div class="home-closing-group">
+            <CtaButton
+              href="#"
+              label="Start a conversation"
+              endIcon="arrow"
+              style="padding: 12px 32px; font-size: 1.0625rem;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</HomeFrame>
+
+<style is:global>
+  .home-closing {
+    position: relative;
+    background-color: #061226; /* NOIR.navyInk */
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .home-closing {
+      height: var(--closing-run);
+    }
+  }
+
+  .home-closing-span {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: var(--closing-span);
+    pointer-events: none;
+    visibility: hidden;
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .home-closing-span {
+      display: block;
+    }
+  }
+
+  .home-closing-stage {
+    position: relative;
+    overflow: hidden;
+    background-color: #061226;
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .home-closing-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+    }
+  }
+
+  .home-closing-picture {
+    position: relative;
+    height: 65svh;
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    .home-closing-picture {
+      height: 100svh;
+    }
+  }
+  .home-closing-picture > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .home-closing-picture > video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .home-closing-picture > video[data-failed="true"] {
+    visibility: hidden;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home-closing-picture > video {
+      display: none;
+    }
+  }
+
+  /* homeInset, then the panel. */
+  .home-closing-cta {
+    padding: 64px 24px;
+    position: relative;
+    background-color: #e6e9ef;
+    color: #0a2a66; /* GROUNDS.panel.fg */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 32px;
+  }
+  @media (min-width: 600px) {
+    .home-closing-cta {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+  @media (min-width: 900px) {
+    .home-closing-cta {
+      padding: 96px 64px;
+      gap: 28px;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .home-closing-cta {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 48%;
+      height: 100%;
+      box-sizing: border-box;
+      padding-top: 64px;
+      padding-bottom: 64px;
+      box-shadow: -28px 0 56px -20px rgba(6, 18, 38, 0.45);
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) and (max-height: 780px) {
+    .home-closing-cta {
+      padding-top: 40px;
+      padding-bottom: 40px;
+      gap: 16px;
+    }
+  }
+
+  .home-closing-cta-anchor {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    pointer-events: none;
+  }
+
+  .home-closing-title {
+    margin: 0;
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #0a2a66; /* NOIR.navyField */
+    font-size: clamp(2.5rem, 11vw, 3.5rem);
+    max-width: 15ch;
+    text-wrap: balance;
+  }
+  @media (min-width: 900px) {
+    .home-closing-title {
+      font-size: clamp(3.5rem, min(6vw, 10svh), 6.5rem);
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) and (max-height: 780px) {
+    .home-closing-title {
+      font-size: clamp(3rem, min(5.2vw, 8.5svh), 6.5rem);
+    }
+  }
+
+  .home-closing-gold {
+    display: block;
+    margin-top: 0.08em;
+    color: #ddb214; /* NOIR.legacyGold */
+  }
+
+  .home-closing-actions {
+    display: grid;
+    gap: 16px;
+  }
+  /* CtaGroup */
+  .home-closing-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+</style>

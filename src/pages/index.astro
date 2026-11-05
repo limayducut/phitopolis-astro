@@ -1,0 +1,75 @@
+---
+// The home page: fresko's AppShell + routes/index.tsx, as static markup.
+// Behaviour boots from src/fresko/boot.ts.
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// chrome (navbar, drawer, footer, overlays)
+import SiteNavbar from "../components/chrome/SiteNavbar.astro";
+import TopNavMegaDrawer from "../components/chrome/TopNavMegaDrawer.astro";
+import SiteFooter from "../components/chrome/SiteFooter.astro";
+import CommandPalette from "../components/chrome/CommandPalette.astro";
+import BackToTop from "../components/chrome/BackToTop.astro";
+import CookieNotice from "../components/chrome/CookieNotice.astro";
+import OverlayScrollbar from "../components/chrome/OverlayScrollbar.astro";
+// intro
+import Preloader from "../components/intro/Preloader.astro";
+// home flow
+import HomeHero from "../components/home/HomeHero.astro";
+import HomeThreadRun from "../components/home/HomeThreadRun.astro";
+import HomeNarration from "../components/home/HomeNarration.astro";
+import PillarChapter from "../components/home/PillarChapter.astro";
+import HomeClosing from "../components/home/HomeClosing.astro";
+// visuals
+import ResearchVisual from "../components/visuals/ResearchVisual.astro";
+import DevelopmentVisual from "../components/visuals/DevelopmentVisual.astro";
+import SupportVisual from "../components/visuals/SupportVisual.astro";
+import HandoffCarrier from "../components/visuals/HandoffCarrier.astro";
+
+import { CHAPTERS } from "../data/home";
+---
+<BaseLayout
+  title="Phitopolis · Making tomorrow's technology available today"
+  description="Founded in 2019 by international industry veterans, Phitopolis stands behind the cloud data pipelines and applications that modern financial markets depend on."
+>
+  <div data-app-root class="app-root">
+    <Preloader />
+    <TopNavMegaDrawer />
+    <!-- Inert while the preloader covers the page (AppShell). -->
+    <div class="contents" data-inert-preloader>
+      <a href="#main-content" class="skip-to-content">Skip to content</a>
+      <SiteNavbar />
+      <!-- Inert while the mega drawer is open (the header stays live). -->
+      <div class="contents" data-inert-meganav>
+        <main id="main-content" tabindex="-1" class="sheet-main">
+          <div id="home-main" class="home-main">
+            <HomeHero />
+            <HomeThreadRun>
+              <HomeNarration />
+              {
+                CHAPTERS.map((chapter) => (
+                  <PillarChapter {...chapter}>
+                    {chapter.pillar === "research" && <ResearchVisual />}
+                    {chapter.pillar === "development" && <DevelopmentVisual />}
+                    {chapter.pillar === "support" && <SupportVisual />}
+                  </PillarChapter>
+                ))
+              }
+            </HomeThreadRun>
+            <!-- The one gold point carried between the pillar diagrams (desktop motion only). -->
+            <HandoffCarrier />
+            <HomeClosing />
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+      <CommandPalette />
+      <BackToTop />
+      <CookieNotice />
+      <OverlayScrollbar />
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import "../fresko/boot";
+</script>

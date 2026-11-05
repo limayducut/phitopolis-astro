@@ -1,0 +1,93 @@
+---
+// BackToTop.tsx: bottom-right navy disc with a frost rim, shown once the page
+// has scrolled a full screen. Behaviour: shared/components/BackToTop.ts.
+// The icon is phosphor's ArrowUp (weight "bold"), inlined.
+---
+<button
+  class="back-to-top"
+  type="button"
+  aria-label="Back to top"
+  data-testid="back-to-top"
+  data-back-to-top
+  aria-hidden="true"
+  tabindex="-1"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256" aria-hidden="true">
+    <path d="M208.49,120.49a12,12,0,0,1-17,0L140,69V216a12,12,0,0,1-24,0V69L64.49,120.49a12,12,0,0,1-17-17l72-72a12,12,0,0,1,17,0l72,72A12,12,0,0,1,208.49,120.49Z"></path>
+  </svg>
+</button>
+
+<style is:global>
+  .back-to-top {
+    position: fixed;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 1300;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(244, 247, 252, 0.32);
+    border-radius: 50%;
+    background-color: rgba(6, 18, 38, 0.82);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #f4f7fc;
+    box-shadow:
+      0 6px 20px rgba(244, 247, 252, 0.22),
+      0 2px 8px rgba(6, 18, 38, 0.12);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      box-shadow 0.2s ease,
+      visibility 0s linear 0.25s;
+  }
+
+  @media (min-width: 900px) {
+    .back-to-top {
+      right: 28px;
+      bottom: 28px;
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  .back-to-top[data-visible] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      box-shadow 0.2s ease,
+      visibility 0s linear 0s;
+  }
+
+  .back-to-top:hover {
+    border-color: rgba(244, 247, 252, 0.55);
+    box-shadow:
+      0 8px 28px rgba(244, 247, 252, 0.32),
+      0 3px 10px rgba(6, 18, 38, 0.16);
+  }
+
+  .back-to-top:focus-visible {
+    outline: 2px solid #061226;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px #ffd966;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-top,
+    .back-to-top[data-visible] {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>

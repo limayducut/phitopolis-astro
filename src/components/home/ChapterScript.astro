@@ -1,0 +1,110 @@
+---
+// ChapterScript.tsx: the chapter's sentences. In flow (phones, reduced
+// motion) they read one under the other, all lit. On desktop with motion they
+// share one cell of the pinned stage and the driver shows one at a time.
+import { PILLAR_HUE } from "@/features/home/pipeline/pillarHue";
+import type { PillarName } from "@/features/home/pipeline/chapterTimeline";
+
+interface Props {
+  pillar: PillarName;
+  beats: readonly string[];
+}
+const { pillar, beats } = Astro.props;
+const words = (text: string) => text.split(/(\s+)/).filter((p) => p.length > 0);
+const isSpace = (part: string) => /^\s+$/.test(part);
+---
+<div class="pipeline-script" aria-hidden="true" style={`--pillar-hue: ${PILLAR_HUE[pillar]}; --pillar-hue-track: ${PILLAR_HUE[pillar]}33;`}>
+  {
+    beats.map((beat, index) => (
+      <div class="pipeline-clause" data-clause={index}>
+        <div class="pipeline-clause-bar" aria-hidden="true">
+          <div class="pipeline-clause-fill" />
+        </div>
+        <p class="pipeline-clause-text">{words(beat).map((p) => (isSpace(p) ? p : <span class="pipeline-word">{p}</span>))}</p>
+      </div>
+    ))
+  }
+</div>
+
+<style is:global>
+  .pipeline-script {
+    min-width: 0;
+    display: grid;
+    gap: 2rem;
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+  @media (min-width: 900px) {
+    .pipeline-script {
+      gap: 2.5rem;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-script {
+      gap: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      align-self: center;
+    }
+  }
+
+  .pipeline-clause {
+    position: relative;
+    padding-left: 16px;
+  }
+  @media (min-width: 900px) {
+    .pipeline-clause {
+      padding-left: 24px;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-clause {
+      grid-area: 1 / 1;
+    }
+    .pipeline-clause:not([data-clause="0"]) {
+      opacity: 0;
+    }
+  }
+
+  .pipeline-clause-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background-color: var(--pillar-hue-track);
+    overflow: hidden;
+  }
+  .pipeline-clause-fill {
+    position: absolute;
+    inset: 0;
+    background-color: var(--pillar-hue);
+    transform-origin: top;
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-clause-fill {
+      transform: scaleY(0);
+    }
+  }
+
+  /* homeTypeSx("beat") + m 0, frost, measure, pretty. */
+  .pipeline-clause-text {
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.16;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: #f4f7fc;
+    max-width: 30ch;
+    text-wrap: pretty;
+  }
+  @media (min-width: 768px) {
+    .pipeline-clause-text {
+      font-size: clamp(1.5625rem, 2.7vw, 2.441rem);
+      max-width: 34ch;
+    }
+  }
+</style>

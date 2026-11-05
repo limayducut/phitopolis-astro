@@ -1,0 +1,465 @@
+---
+// SiteFooter.tsx as rendered on "/" (AppShell: SiteFooterSlot light, the
+// footer's own default action; home declares `ending: null`, so no EndingCta).
+// Three columns from sm (brand, PATHWAYS, CONTACT); phones keep PATHWAYS only.
+// Page links are "#" except Home; the mailto links are real.
+import CtaButton from "./CtaButton.astro";
+import { TAGLINE } from "../../fresko/shared/components/preloaderChoreo";
+
+const PRIMARY_LINKS = [
+  { label: "Home", to: "/" },
+  { label: "About", to: "/about" },
+  { label: "Careers", to: "/careers" },
+  { label: "Blog", to: "/blog" },
+  { label: "Contact", to: "/contact" },
+] as const;
+const hrefFor = (to: string) => (to === "/" ? "/" : "#");
+// AppShell NARRATION_FLOW["/"]
+const currentNarration = { next: "/about", label: "ABOUT PHITOPOLIS" };
+// FOOTER_DEFAULT_ACTION
+const handoff = { label: "Start a conversation", to: "/contact" };
+const mail =
+  "M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 4-8 5-8-5V6l8 5 8-5z";
+const arrow = "m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z";
+---
+<footer class="site-footer" data-home-footer="true" data-site-footer>
+  <div class="site-footer__ground" aria-hidden="true"></div>
+  <div class="site-footer__hairline" aria-hidden="true"></div>
+  <div class="site-footer__container">
+    <div data-stagger-group>
+      <div class="site-footer__grid">
+        <div class="site-footer__cell site-footer__cell--intro site-footer__phone-hidden">
+          <div class="site-footer__stagger" data-stagger-item>
+            <div class="site-footer__stack site-footer__intro">
+              <p class="site-footer__eyebrow">ABOUT PHITOPOLIS</p>
+              <p class="site-footer__motto">{TAGLINE}</p>
+              <span class="site-footer__cta">
+                <CtaButton href={hrefFor(handoff.to)} label={handoff.label} endIcon="arrow" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="site-footer__cell site-footer__cell--paths">
+          <div class="site-footer__stagger" data-stagger-item>
+            <div class="site-footer__stack" style="--gap: 16px">
+              <p class="site-footer__label">PATHWAYS</p>
+              <nav class="site-footer__nav" aria-label="Footer navigation">
+                {
+                  PRIMARY_LINKS.map((link) => (
+                    <a
+                      class="site-footer__nav-link"
+                      href={hrefFor(link.to)}
+                      aria-current={link.to === "/" ? "page" : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  ))
+                }
+              </nav>
+            </div>
+          </div>
+        </div>
+
+        <div class="site-footer__cell site-footer__cell--contact site-footer__phone-hidden">
+          <div class="site-footer__stagger" data-stagger-item>
+            <div class="site-footer__stack" style="--gap: 18px">
+              <p class="site-footer__label">CONTACT</p>
+              <div class="site-footer__stack" style="--gap: 13.2px">
+                <div>
+                  <p class="site-footer__label site-footer__sublabel">INQUIRIES</p>
+                  <a class="site-footer__mail" href="mailto:info@phitopolis.com">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d={mail}></path></svg>
+                    info@phitopolis.com
+                  </a>
+                </div>
+                <div>
+                  <p class="site-footer__label site-footer__sublabel">CAREERS</p>
+                  <a class="site-footer__mail" href="mailto:jobs@phitopolis.com">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d={mail}></path></svg>
+                    jobs@phitopolis.com
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-reveal-clip>
+      <div class="site-footer__bottom">
+        <div class="site-footer__bottom-row">
+          <p class="site-footer__copy">© Phitopolis 2019. All Rights Reserved.</p>
+          <a class="site-footer__continue" href={hrefFor(currentNarration.next)}>
+            Continue to {currentNarration.label}
+            <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d={arrow}></path></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style is:global>
+  .site-footer {
+    position: relative;
+    margin-top: auto;
+    overflow: hidden;
+    padding: 48px 0;
+    background-color: #04122e;
+    color: #f4f7fc;
+  }
+
+  @media (min-width: 900px) {
+    .site-footer {
+      padding: 72px 0;
+    }
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+
+  .site-footer__ground {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(165deg, #06183b 0%, #04122e 70%);
+  }
+
+  .site-footer__hairline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 199, 44, 0.45) 45%,
+      rgba(255, 199, 44, 0.45) 55%,
+      transparent
+    );
+  }
+
+  /* MUI Container maxWidth="xl" */
+  .site-footer__container {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1536px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  @media (min-width: 600px) {
+    .site-footer__container {
+      padding: 0 24px;
+    }
+  }
+
+  /* MUI Grid container: columnSpacing {xs 4, md 6, lg 10}, rowSpacing {xs 5, md 4} */
+  .site-footer__grid {
+    --cs: 32px;
+    --rs: 40px;
+    display: flex;
+    flex-flow: row wrap;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: var(--rs) var(--cs);
+  }
+
+  @media (min-width: 900px) {
+    .site-footer__grid {
+      --cs: 48px;
+      --rs: 32px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .site-footer__grid {
+      --cs: 80px;
+    }
+  }
+
+  .site-footer__cell {
+    --n: 12;
+    flex-grow: 0;
+    flex-basis: auto;
+    min-width: 0;
+    box-sizing: border-box;
+    width: calc(100% * var(--n) / 12 - (12 - var(--n)) / 12 * var(--cs));
+  }
+
+  @media (min-width: 600px) {
+    .site-footer__cell--paths,
+    .site-footer__cell--contact {
+      --n: 6;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .site-footer__cell--intro {
+      --n: 5;
+    }
+    .site-footer__cell--paths {
+      --n: 3;
+    }
+    .site-footer__cell--contact {
+      --n: 4;
+    }
+  }
+
+  /* HIDE_ON_PHONE */
+  .site-footer__phone-hidden {
+    display: none;
+  }
+
+  @media (min-width: 600px) {
+    .site-footer__phone-hidden {
+      display: block;
+    }
+  }
+
+  .site-footer__stagger {
+    height: 100%;
+  }
+
+  /* MUI Stack */
+  .site-footer__stack {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-footer__stack > :not(style) ~ :not(style) {
+    margin-top: var(--gap, 20px);
+  }
+
+  .site-footer__intro {
+    --gap: 20px;
+    max-width: 410px;
+  }
+
+  .site-footer__cta {
+    display: inline-flex;
+    align-self: flex-start;
+  }
+
+  /* Typography body1 defaults (Inter 1rem / 1.65) under every sx below. */
+  .site-footer__eyebrow,
+  .site-footer__motto,
+  .site-footer__label,
+  .site-footer__copy {
+    font-family: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: 0.00938em;
+  }
+
+  .site-footer__eyebrow {
+    color: #ffc72c;
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+  }
+
+  .site-footer__motto {
+    font-size: 1.953rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.08;
+  }
+
+  @media (min-width: 900px) {
+    .site-footer__motto {
+      font-size: 2.441rem;
+    }
+  }
+
+  .site-footer__label {
+    color: rgba(255, 255, 255, 0.5);
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .site-footer .site-footer__sublabel {
+    margin-bottom: 4.4px;
+  }
+
+  /* Phones: three across; from sm a single column. */
+  .site-footer__nav {
+    display: grid;
+    gap: 2.4px;
+    column-gap: 32px;
+    grid-template-columns: repeat(3, max-content);
+  }
+
+  @media (min-width: 600px) {
+    .site-footer__nav {
+      column-gap: 0;
+      grid-template-columns: none;
+    }
+  }
+
+  .site-footer__nav-link {
+    position: relative;
+    display: inline-flex;
+    width: fit-content;
+    padding: 4.4px 0;
+    color: #f4f7fc;
+    font-family: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.65;
+    letter-spacing: 0.00938em;
+    text-decoration: none !important;
+  }
+
+  .site-footer__nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 1px;
+    background-color: #ffc72c;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .site-footer__nav-link:hover::after,
+  .site-footer__nav-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-footer__nav-link::after {
+      transition: none;
+    }
+  }
+
+  .site-footer__nav-link::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+  }
+
+  .site-footer__mail {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6.4px;
+    color: #f4f7fc;
+    font-family: "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.65;
+    text-decoration: none !important;
+    transition: color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .site-footer__mail:hover,
+  .site-footer__mail:focus-visible {
+    color: #ffc72c;
+  }
+
+  .site-footer__mail::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+  }
+
+  .site-footer__mail svg {
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+    font-size: 17px;
+    fill: #ffc72c;
+  }
+
+  .site-footer__bottom {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  @media (min-width: 900px) {
+    .site-footer__bottom {
+      margin-top: 56px;
+    }
+  }
+
+  .site-footer__bottom-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .site-footer__bottom-row > :not(style) ~ :not(style) {
+    margin-top: 16px;
+  }
+
+  @media (min-width: 900px) {
+    .site-footer__bottom-row {
+      flex-direction: row;
+      align-items: center;
+    }
+    .site-footer__bottom-row > :not(style) ~ :not(style) {
+      margin-top: 0;
+      margin-left: 16px;
+    }
+  }
+
+  .site-footer__copy {
+    color: rgba(255, 255, 255, 0.5);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+  }
+
+  .site-footer__continue {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #f4f7fc;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.65;
+    letter-spacing: 0.04em;
+    text-decoration: none !important;
+    transition: color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .site-footer__continue:hover,
+  .site-footer__continue:focus-visible {
+    color: #ffc72c;
+  }
+
+  .site-footer__continue::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
+
+  .site-footer__continue svg {
+    width: 1em;
+    height: 1em;
+    font-size: 16px;
+    fill: currentColor;
+  }
+</style>

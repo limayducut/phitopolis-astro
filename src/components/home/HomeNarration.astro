@@ -1,0 +1,124 @@
+---
+// HomeNarration.tsx: the vision statement. The curtain (hero recede, rule
+// draw) runs with motion everywhere; on desktop with motion the stage is
+// sticky inside a 140svh box and the words light up across the hold.
+// Behaviour: src/fresko/features/home/pipeline/HomeNarration.ts.
+import HomeFrame from "./HomeFrame.astro";
+import GoldThread from "./GoldThread.astro";
+import { CONTENT } from "@/shared/content";
+import { NARRATION_SVH } from "@/features/home/pipeline/chapterTimeline";
+import { VISION_GOLD_PHRASE, VISION_HEADING } from "@/features/home/pipeline/pipelineCopy";
+import "../../fresko/features/home/pipeline/pipeline.css";
+
+const statement = CONTENT.hero.vision.body;
+const start = statement.indexOf(VISION_GOLD_PHRASE);
+if (start < 0) throw new Error("Home pipeline: vision phrase is missing from the source statement");
+/** wordSpans: words as spans, whitespace kept as plain text. */
+const parts = (text: string) => text.split(/(\s+)/).filter((p) => p.length > 0);
+const isSpace = (part: string) => /^\s+$/.test(part);
+const leading = parts(statement.slice(0, start));
+const highlight = parts(VISION_GOLD_PHRASE);
+const trailing = parts(statement.slice(start + VISION_GOLD_PHRASE.length));
+---
+<HomeFrame id="home-narration">
+  <div class="pipeline-narration" data-home-pipeline="" style={`--narration-svh: ${NARRATION_SVH}svh;`}>
+    <GoldThread prefix="narration" lead />
+    <div class="pipeline-narration-stage">
+      <div style="width: 100%;">
+        <div class="pipeline-narration-rule" aria-hidden="true"></div>
+        <h2 class="pipeline-narration-title">{VISION_HEADING}</h2>
+        <p class="pipeline-narration-text">
+          {leading.map((p) => (isSpace(p) ? p : <span class="pipeline-word">{p}</span>))}<span class="pipeline-gold-phrase">{highlight.map((p) => (isSpace(p) ? p : <span class="pipeline-word">{p}</span>))}</span>{trailing.map((p) => (isSpace(p) ? p : <span class="pipeline-word">{p}</span>))}
+        </p>
+      </div>
+    </div>
+  </div>
+</HomeFrame>
+
+<style is:global>
+  .pipeline-narration {
+    position: relative;
+    isolation: isolate;
+    background-color: #061226; /* GROUNDS.base.bg */
+    color: #f4f7fc;
+    --pipeline-selection-ink: #0a2a66;
+    --pipeline-selection-fill: #ffc72c;
+    min-height: 0;
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-narration .pipeline-word {
+      opacity: 0.16;
+    }
+    .pipeline-narration {
+      height: var(--narration-svh);
+      min-height: var(--narration-svh);
+    }
+  }
+
+  /* homeInset, then the stage's own layout. */
+  .pipeline-narration-stage {
+    padding: 64px 24px;
+    min-height: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    overflow: clip;
+  }
+  @media (min-width: 600px) {
+    .pipeline-narration-stage {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+  @media (min-width: 900px) {
+    .pipeline-narration-stage {
+      padding: 96px 64px;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-narration-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      min-height: 0;
+      padding-top: 24px;
+      padding-bottom: 24px;
+    }
+  }
+
+  .pipeline-narration-rule {
+    height: 1px;
+    width: 100%;
+    background-color: #ffc72c;
+    transform-origin: left center;
+    margin-bottom: 32px;
+  }
+
+  /* homeTypeSx("label") + m 0, mb 2.5, frost at ~0.72 alpha. */
+  .pipeline-narration-title {
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    margin: 0 0 20px;
+    color: #f4f7fcb8;
+  }
+
+  /* homeTypeSx("statement") + m 0, maxWidth 22ch, pretty. */
+  .pipeline-narration-text {
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.953rem;
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 0;
+    max-width: 22ch;
+    text-wrap: pretty;
+  }
+  @media (min-width: 768px) {
+    .pipeline-narration-text {
+      font-size: clamp(1.953rem, 3.6vw, 3.052rem);
+    }
+  }
+</style>

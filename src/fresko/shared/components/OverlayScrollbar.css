@@ -1,0 +1,55 @@
+/* The page scrollbar as a see-through overlay: a fixed rail on the right edge
+   whose only visible part is the navy thumb. While it is active the root
+   element's native scrollbar is hidden (html.has-overlay-scrollbar, theme/
+   components.ts), so no gutter is painted and no canvas colour shows beside
+   the page. Colours arrive as custom properties from the component. */
+
+.overlay-scrollbar {
+  position: fixed;
+  top: 8px; /* RAIL_INSET */
+  right: 0;
+  bottom: 8px; /* RAIL_INSET */
+  width: 14px;
+  background: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.overlay-scrollbar[hidden] {
+  display: none;
+}
+
+.overlay-scrollbar__thumb {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  width: 6px;
+  height: 0;
+  border-radius: 999px;
+  background: var(--overlay-scrollbar-thumb);
+  /* A faint light rim so the navy pill still reads over the navy sections. */
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28);
+  touch-action: none;
+  will-change: transform;
+}
+
+/* Widens the grab area past the 6px pill without widening what is painted. */
+.overlay-scrollbar__thumb::before {
+  content: "";
+  position: absolute;
+  inset: 0 -3px;
+}
+
+.overlay-scrollbar__thumb:hover,
+.overlay-scrollbar__thumb[data-dragging] {
+  width: 8px;
+  background: var(--overlay-scrollbar-thumb-hover);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .overlay-scrollbar__thumb {
+    transition:
+      width 0.15s ease-out,
+      background-color 0.15s ease-out;
+  }
+}

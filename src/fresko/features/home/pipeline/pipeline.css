@@ -1,0 +1,44 @@
+.pipeline-gold-phrase {
+  color: var(--accent-fg);
+}
+
+[data-home-pipeline] ::selection {
+  color: var(--pipeline-selection-ink);
+  background-color: var(--pipeline-selection-fill);
+}
+
+/* The photo fills its plate in full colour: the arrival opens the shutters and
+   settles the scale from the lit state, so the DOM with no JS is the finished photo.
+   Its object-position is set per photo by ChapterOpener (with the faces' stretch the
+   arrival's aperture holds). The compositor hint is the arrival's to give. */
+.pipeline-opener-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: normal;
+}
+
+.pipeline-visual-stage {
+  overflow: clip;
+}
+
+.pipeline-official-description {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-opener-media {
+    animation: none;
+    transition: none;
+  }
+}

@@ -1,0 +1,274 @@
+---
+// ChapterOpener.tsx: the chapter's photo plate (aperture shutters, scrim,
+// handoff veil, cover dim) and the band with the pillar name and deck.
+// Phones / reduced motion: plate over band, in flow. Desktop with motion: the
+// opener is sticky, full-bleed, the copy laid over the photo's left fade.
+import HandoffVeil from "./HandoffVeil.astro";
+import { PLATE_FOCUS, PLATE_PHONE_POSITION_X } from "@/features/home/pipeline/plateFocus";
+import { PILLAR_HUE } from "@/features/home/pipeline/pillarHue";
+import { CHAPTER_Z } from "@/features/home/pipeline/chapterStacking";
+import { OPENER_RUN_SVH, type PillarName } from "@/features/home/pipeline/chapterTimeline";
+import { SHUTTER_BOTTOM_CLASS, SHUTTER_TOP_CLASS } from "@/features/home/rebuild/aperture";
+
+interface Props {
+  pillar: PillarName;
+  name: string;
+  deck: string;
+  image: string;
+  alt: string;
+  veil?: boolean;
+}
+
+const IMAGE_SIZE = {
+  research: { width: 2000, height: 1116 },
+  development: { width: 2000, height: 1120 },
+  support: { width: 2000, height: 1125 },
+} as const;
+
+const { pillar, name, deck, image, alt, veil = false } = Astro.props;
+const size = IMAGE_SIZE[pillar];
+const focus = PLATE_FOCUS[pillar];
+const vars = [
+  `--opener-run: ${OPENER_RUN_SVH}svh`,
+  `--opener-z: ${CHAPTER_Z.opener}`,
+  `--opener-z-resting: ${CHAPTER_Z.openerResting}`,
+  `--plate-phone-pos: ${PLATE_PHONE_POSITION_X[pillar] * 100}% ${focus.positionY * 100}%`,
+  `--plate-wide-pos: 50% ${focus.positionY * 100}%`,
+  `--pillar-hue: ${PILLAR_HUE[pillar]}`,
+].join("; ");
+---
+<div class="pipeline-opener-run" style={vars}>
+  <header class="pipeline-opener">
+    <div class="pipeline-opener-frame">
+      <div class="pipeline-opener-window">
+        <img
+          class="pipeline-opener-media"
+          src={image}
+          alt={alt}
+          width={size.width}
+          height={size.height}
+          loading="lazy"
+          decoding="async"
+          data-faces-top={focus.facesTop}
+          data-faces-bottom={focus.facesBottom}
+          data-position-y={focus.positionY}
+        />
+        <!-- ApertureShutters: rest open, just outside the plate. -->
+        <div aria-hidden="true" class:list={[SHUTTER_TOP_CLASS, "home-aperture-shutter"]} style="top: calc(-100% - 1px);"></div>
+        <div aria-hidden="true" class:list={[SHUTTER_BOTTOM_CLASS, "home-aperture-shutter"]} style="top: calc(100% + 1px);"></div>
+        <div aria-hidden="true" class="pipeline-opener-scrim"></div>
+        {veil ? <HandoffVeil class="pipeline-opener-veil" /> : null}
+      </div>
+      <div aria-hidden="true" class="pipeline-opener-dim"></div>
+    </div>
+    <div class="pipeline-opener-copy">
+      <h2 class="pipeline-opener-title">{name}</h2>
+      <p class="pipeline-deck">{deck}</p>
+    </div>
+  </header>
+</div>
+
+<style is:global>
+  .pipeline-opener-run {
+    position: relative;
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-opener-run {
+      height: var(--opener-run);
+    }
+  }
+
+  .pipeline-opener {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: clip;
+    z-index: var(--opener-z);
+  }
+  @media (min-width: 768px) {
+    .pipeline-opener {
+      height: 100svh;
+      min-height: 36rem;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-opener {
+      position: sticky;
+      top: 0;
+      z-index: var(--opener-z-resting);
+      min-height: 0;
+    }
+  }
+
+  .pipeline-opener-frame {
+    position: relative;
+    flex: 0 0 auto;
+    height: 56svh;
+    min-height: 16rem;
+    transform-origin: 50% 30%;
+  }
+  @media (min-width: 768px) {
+    .pipeline-opener-frame {
+      flex: 1 1 auto;
+      height: auto;
+      min-height: 0;
+    }
+  }
+
+  .pipeline-opener-window {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+    background-color: #06183b /* NOIR.navyDeep */;
+  }
+
+  .pipeline-opener-media {
+    object-position: var(--plate-phone-pos);
+  }
+  @media (min-width: 768px) {
+    .pipeline-opener-media {
+      object-position: var(--plate-wide-pos);
+    }
+  }
+
+  .home-aperture-shutter {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background-color: #061226 /* GROUNDS.base.bg */;
+    pointer-events: none;
+  }
+
+  .pipeline-opener-scrim {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(0deg, #061226e6 0%, #061226cc 48%, transparent 100%);
+  }
+  @media (min-width: 768px) {
+    .pipeline-opener-scrim {
+      background-image: linear-gradient(
+        90deg,
+        #061226e6 0%,
+        #061226b3 16%,
+        #06122673 32%,
+        #06122626 44%,
+        transparent 52%
+      );
+    }
+  }
+
+  .pipeline-opener-dim {
+    position: absolute;
+    inset: 0;
+    background-color: #061226; /* NOIR.navyInk */
+    opacity: 0;
+  }
+
+  /* homeInset, then py 5 and the band's own layout. */
+  .pipeline-opener-copy {
+    padding: 40px 24px;
+    position: relative;
+    z-index: 2;
+    flex: 0 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 600px) {
+    .pipeline-opener-copy {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+  @media (min-width: 900px) {
+    .pipeline-opener-copy {
+      padding-left: 64px;
+      padding-right: 64px;
+    }
+  }
+  @media (min-width: 768px) {
+    .pipeline-opener-copy {
+      padding-top: 24px;
+      padding-bottom: 24px;
+      min-height: 30%;
+    }
+  }
+  @media (min-width: 768px) and (max-height: 640px) {
+    .pipeline-opener-copy {
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-opener-copy {
+      position: absolute;
+      inset: 0;
+      min-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      justify-content: center;
+      background: none;
+    }
+  }
+
+  /* homeTypeSx("displayInner") + the opener's overrides. */
+  .pipeline-opener-title {
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    margin: 0;
+    margin-top: auto;
+    color: #f4f7fc; /* NOIR.frost */
+    max-width: 14ch;
+    text-wrap: balance;
+  }
+  @media (min-width: 768px) {
+    .pipeline-opener-title {
+      font-size: clamp(2.25rem, 4vw, 3.75rem);
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-opener-title {
+      margin-top: 0;
+      font-size: clamp(2.75rem, 8vw, 6rem);
+      font-weight: 700;
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+    }
+  }
+  .pipeline-opener-title .pipeline-opener-line {
+    overflow: hidden;
+  }
+
+  /* homeTypeSx("deck") + hue, measure, spacing. */
+  .pipeline-deck {
+    font-family: "Outfit", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--pillar-hue);
+    max-width: 34ch;
+    margin: 20px 0 auto;
+  }
+  @media (min-width: 768px) {
+    .pipeline-deck {
+      font-size: clamp(1.25rem, 2.25vw, 1.5625rem);
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-deck {
+      margin-bottom: 0;
+      font-size: clamp(1.25rem, 2.25vw, 2rem);
+    }
+  }
+  @media (max-height: 640px) {
+    .pipeline-deck {
+      margin-top: 12px;
+    }
+  }
+</style>

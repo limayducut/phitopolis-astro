@@ -1,0 +1,219 @@
+---
+// PillarChapter.tsx: opener + body. The body holds the pinned stage (the
+// sentences and the chapter's diagram, passed in through the default slot)
+// and, on desktop with motion, rises over the sticky opener (mt -100svh) and
+// spans bodyHeightSvh. Behaviour: features/home/pipeline/useChapterDriver.ts.
+//
+// index.astro spreads a src/data/home.ts entry into this component; only
+// `pillar` is read — everything else resolves from the fresko modules.
+import HomeFrame from "./HomeFrame.astro";
+import ChapterOpener from "./ChapterOpener.astro";
+import ChapterScript from "./ChapterScript.astro";
+import { CONTENT } from "@/shared/content";
+import { CHAPTER_BEATS, CHAPTERS } from "@/features/home/pipeline/pipelineCopy";
+import { CHAPTER_LAYOUT, HORIZONTAL_TEXT_SHARE } from "@/features/home/pipeline/chapterLayout";
+import { CHAPTER_Z } from "@/features/home/pipeline/chapterStacking";
+import { bodyHeightSvh, type PillarName } from "@/features/home/pipeline/chapterTimeline";
+import { receivesHandoff } from "@/features/home/pipeline/handoffPath";
+import type { HomeFlowId } from "@/features/home/rebuild/homeFlow";
+import "../../fresko/features/home/pipeline/pipeline.css";
+
+interface Props {
+  pillar: PillarName;
+  [key: string]: unknown;
+}
+
+const SECTION_IDS: Record<PillarName, HomeFlowId> = {
+  research: "home-research",
+  development: "home-development",
+  support: "home-support",
+};
+const CONTENT_IDS: Record<PillarName, string> = { research: "01", development: "02", support: "03" };
+/** How far each chapter's diagram is scaled up from its own frame (wide stages only). */
+const VISUAL_SCALE: Record<PillarName, number> = { research: 1, development: 1.4, support: 1 };
+
+const { pillar } = Astro.props;
+const id = SECTION_IDS[pillar];
+const beats = CHAPTER_BEATS[pillar];
+const content = CONTENT.hero.salesPitch.pillars.find((entry) => entry.id === CONTENT_IDS[pillar]);
+if (!content) throw new Error(`Home pipeline: missing pillar ${CONTENT_IDS[pillar]}`);
+const name = content.name.replace(/\s+Pillar$/i, "");
+const layout = CHAPTER_LAYOUT[pillar];
+const textLeft = layout.textSide === "left";
+const scale = VISUAL_SCALE[pillar];
+const vars = [
+  `--body-svh: ${bodyHeightSvh(beats.length)}svh`,
+  `--body-z: ${CHAPTER_Z.body}`,
+  `--script-col: ${textLeft ? 1 : 2}`,
+  `--visual-col: ${textLeft ? 2 : 1}`,
+  `--stage-cols: ${textLeft ? "minmax(0, 5fr) minmax(0, 7fr)" : "minmax(0, 7fr) minmax(0, 5fr)"}`,
+  `--text-share: ${HORIZONTAL_TEXT_SHARE}fr`,
+  `--visual-share: ${100 - HORIZONTAL_TEXT_SHARE}fr`,
+  `--visual-frame: ${100 / scale}%`,
+  `--visual-scale: ${scale}`,
+].join("; ");
+---
+<HomeFrame id={id}>
+  <div
+    class:list={["pipeline-chapter", `pipeline-chapter-${pillar}`]}
+    data-home-pipeline=""
+    data-pillar={pillar}
+    style={vars}
+  >
+    <ChapterOpener
+      pillar={pillar}
+      name={name}
+      deck={CHAPTERS[pillar].kicker}
+      image={content.image}
+      alt={content.alt}
+      veil={receivesHandoff(pillar)}
+    />
+    <div class="pipeline-chapter-body">
+      <!-- The pinned stage: sentences and the visual share one viewport; the body's scroll
+           is the pin's length. Out of motion it is just the two columns in flow. -->
+      <div class="pipeline-pin" data-direction={layout.direction} data-text-side={layout.textSide}>
+        <div class="pipeline-track">
+          <ChapterScript pillar={pillar} beats={beats} />
+          <div class="pipeline-visual-stage">
+            <!-- The diagram is laid out for a smaller frame and scaled up from its centre. -->
+            <div class="pipeline-visual-scale">
+              <slot />
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="pipeline-official-description">{content.officialDescription}</p>
+    </div>
+  </div>
+</HomeFrame>
+
+<style is:global>
+  .pipeline-chapter {
+    position: relative;
+    background-color: #061226; /* GROUNDS.base.bg */
+    color: #f4f7fc; /* NOIR.frost */
+    --pipeline-selection-ink: #0a2a66;
+    --pipeline-selection-fill: #ffc72c;
+  }
+
+  .pipeline-chapter-body {
+    position: relative;
+    padding-left: 24px;
+    padding-right: 24px;
+    box-sizing: border-box;
+    padding-bottom: 72px;
+  }
+  @media (min-width: 600px) {
+    .pipeline-chapter-body {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+  @media (min-width: 900px) {
+    .pipeline-chapter-body {
+      padding-left: 64px;
+      padding-right: 64px;
+    }
+  }
+  @media (min-width: 768px) {
+    .pipeline-chapter-body {
+      padding-top: 64px;
+      padding-bottom: 64px;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-chapter-body {
+      z-index: var(--body-z);
+      margin-top: -100svh;
+      padding-top: 0;
+      padding-bottom: 0;
+      height: var(--body-svh);
+      background-color: #061226;
+    }
+  }
+
+  .pipeline-pin {
+    position: relative;
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-pin {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow-y: clip;
+      overflow-x: visible;
+    }
+  }
+
+  .pipeline-track {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  @media (min-width: 768px) {
+    .pipeline-track {
+      grid-template-columns: var(--stage-cols);
+      column-gap: 32px;
+    }
+    .pipeline-track > .pipeline-script {
+      grid-column: var(--script-col);
+      grid-row: 1;
+    }
+  }
+  @media (min-width: 768px) and (min-width: 1200px) {
+    .pipeline-track {
+      column-gap: 64px;
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-track {
+      height: 100%;
+    }
+    .pipeline-pin[data-direction="horizontal"] .pipeline-track {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, var(--text-share)) minmax(0, var(--visual-share));
+    }
+    .pipeline-pin[data-direction="horizontal"] .pipeline-track > .pipeline-script {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: end;
+      padding-bottom: 32px;
+    }
+  }
+
+  .pipeline-visual-stage {
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    height: auto;
+  }
+  @media (min-width: 768px) {
+    .pipeline-visual-stage {
+      grid-column: var(--visual-col);
+      grid-row: 1;
+      height: min(100svh, 56rem);
+    }
+  }
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .pipeline-visual-stage {
+      height: 100svh;
+    }
+    .pipeline-pin[data-direction="horizontal"] .pipeline-visual-stage {
+      height: 100%;
+      grid-column: 1;
+      grid-row: 2;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .pipeline-visual-scale {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: var(--visual-frame);
+      height: var(--visual-frame);
+      transform: translate(-50%, -50%) scale(var(--visual-scale));
+    }
+  }
+</style>

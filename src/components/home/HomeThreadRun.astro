@@ -1,0 +1,20 @@
+---
+// HomeThreadRun.tsx: one shared scroll clock for every gold-thread segment
+// inside (today: the narration's). Renders NO position and NO z-index, so the
+// HomeFrame sections inside keep their own page-order stacking.
+// Behaviour: src/fresko/features/home/rebuild/HomeThreadRun.ts.
+---
+<div class="home-thread-run" data-thread-run>
+  <slot />
+</div>
+
+<style is:global>
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .home-thread-run [data-thread-draw] {
+      transform: scaleY(0);
+    }
+    .home-thread-run [data-thread-tip="follow"] {
+      visibility: hidden;
+    }
+  }
+</style>
